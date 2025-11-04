@@ -1,0 +1,67 @@
+[
+  {
+    "type": "band",
+    "band": "Polyphia",
+    "path": "images/bands/polyphia.jpg",
+    "search": "Polyphia band photo"
+  },
+  {
+    "type": "album",
+    "band": "Polyphia",
+    "song": "Playing God",
+    "path": "images/albums/polyphia_playing_god.jpg",
+    "search": "Polyphia Playing God album cover"
+  },
+  {
+    "type": "band",
+    "band": "Eagles",
+    "path": "images/bands/eagles.jpg",
+    "search": "Eagles band photo"
+  },
+  {
+    "type": "album",
+    "band": "Eagles",
+    "song": "Hotel California",
+    "path": "images/albums/eagles_hotel_california.jpg",
+    "search": "Eagles Hotel California album cover"
+  },
+  {
+    "type": "band",
+    "band": "Nirvana",
+    "path": "images/bands/nirvana.jpg",
+    "search": "Nirvana band photo"
+  },
+  {
+    "type": "album",
+    "band": "Nirvana",
+    "song": "Heart-Shaped Box",
+    "path": "images/albums/nirvana_heart-shaped_box.jpg",
+    "search": "Nirvana Heart-Shaped Box album cover"
+  },
+  {
+    "type": "band",
+    "band": "Sleep Token",
+    "path": "images/bands/sleep_token.jpg",
+    "search": "Sleep Token band photo"
+  },
+  {
+    "type": "album",
+    "band": "Sleep Token",
+    "song": "Alkaline",
+    "path": "images/albums/sleep_token_alkaline.jpg",
+    "search": "Sleep Token Alkaline album cover"
+  },
+  {
+    "type": "band",
+    "band": "Dream Theater",
+    "path": "images/bands/dream_theater.jpg",
+    "search": "Dream Theater band photo"
+  },
+  {
+    "type": "album",
+    "band": "Dream Theater",
+    "song": "Metropolis Pt. I: ‘The Miracle and the Sleeper’",
+    "path": "images/albums/dream_theater_metropolis_pt_i_‘the_miracle_and_the_sleeper’.jpg",
+    "search": "Dream Theater Metropolis Pt. I: ‘The Miracle and the Sleeper’ album cover"
+  }
+]

@@ -1,0 +1,54 @@
+{
+  "bands": [
+    {
+      "name": "Polyphia",
+      "bio": "Polyphia is a U.S.-based instrumental guitar-driven band that fuses progressive rock, metal, hip-hop beats and EDM textures into a virtuosic and modern sound. Their twin-guitar attack and genre-bending approach have established them as innovators in contemporary guitar-music circles.",
+      "bandImage": "images/bands/polyphia.jpg",
+      "recommendedSong": {
+        "title": "Playing God",
+        "review": "“Playing God” stands out as a signature Polyphia track: slick, rhythmically nimble guitars trade melodic hooks over electronic-inflected beats while maintaining a rock-edge clarity. The interplay between the lead guitar voices shines, and the production blends hip-hop-style groove with progressive instrumental virtuosity. Emotionally the track feels confident and forward-looking, less about angst and more about mastery and momentum.",
+        "albumCover": "images/albums/polyphia_playing_god.jpg"
+      }
+    },
+    {
+      "name": "Eagles",
+      "bio": "Eagles formed in Los Angeles in 1971 and became a defining voice in the country-rock and California-rock sound of the 1970s. Their harmonised vocals, crisp guitar textures and seamless blend of folk, rock and country made them hugely influential in mainstream American rock.",
+      "bandImage": "images/bands/eagles.jpg",
+      "recommendedSong": {
+        "title": "Hotel California",
+        "review": "“Hotel California” is a masterclass of mood, narrative and sonic layering. The track opens with an almost eerie arpeggiated guitar motif, then builds into a lush, atmospheric landscape filled with dual-guitar solos, evocative lyrics and a chord progression rich in tension and release. Vocally, the blend of lead and layered harmonies creates a reflective, slightly haunting effect. Emotionally, the song evokes sunset road-trips, introspection and the bittersweet price of dreams.",
+        "albumCover": "images/albums/eagles_hotel_california.jpg"
+      }
+    },
+    {
+      "name": "Nirvana",
+      "bio": "Nirvana emerged from the Seattle scene in the late 1980s and became the defining voice of grunge and alternative rock by the early 1990s. Their raw energy, quiet-loud dynamics and Kurt Cobain’s songwriting recalibrated rock’s emotional register: introspective, urgent, yet accessible.",
+      "bandImage": "images/bands/nirvana.jpg",
+      "recommendedSong": {
+        "title": "Heart-Shaped Box",
+        "review": "“Heart-Shaped Box” begins with a haunting guitar line, heavy bass and drums, then enters a mid-tempo, crushing chorus and an emotive vocal performance by Cobain. The song’s themes of entrapment and desire are matched by the dense texture and shifting dynamics. Emotionally it feels dark, yearning and powerful-and musically it demonstrates the band’s capacity for deeper sonic layering beyond their raw exterior.",
+        "albumCover": "images/albums/nirvana_heart-shaped_box.jpg"
+      }
+    },
+    {
+      "name": "Sleep Token",
+      "bio": "Sleep Token is a British anonymous rock-band that blends progressive metal, ambient electronics, trap beats and soulful vocals into a genre-defying sonic experience. The band’s aesthetic draws from ritualistic atmosphere, dynamic contrasts and a polished modern production style.",
+      "bandImage": "images/bands/sleep_token.jpg",
+      "recommendedSong": {
+        "title": "Alkaline",
+        "review": "“Alkaline” combines trap-inflected beats, atmospheric guitar swells and soulful clean vocals with bursts of heavier instrumentation. The production places the vocals front and centre, and the lyric speaks to internal struggle and healing. Emotionally the track is reflective and powerful, and musically it illustrates how Sleep Token fuse modern genres with metal structure-thus a strong recommendation.",
+        "albumCover": "images/albums/sleep_token_alkaline.jpg"
+      }
+    },
+    {
+      "name": "Dream Theater",
+      "bio": "Dream Theater are a U.S. progressive-metal band known for their technical proficiency, long-form compositions and thematic ambition. With a foundation in virtuoso musicianship-extended instrumental passages, sophisticated time-signatures and dynamic shifts-they have become a benchmark for high-end prog-metal.",
+      "bandImage": "images/bands/dream_theater.jpg",
+      "recommendedSong": {
+        "title": "Metropolis Pt. I: ‘The Miracle and the Sleeper’",
+        "review": "“Metropolis Pt. I” is a sweeping progressive epic: long instrumental introductions, melodic motifs, heavy riffs and layered vocals combine to tell a complex narrative. The emotional journey moves from regret through resolution, and the musicianship demands attentive listening. It’s recommended for those who wish to dive deeper into Dream Theater’s ambitious side.",
+        "albumCover": "images/albums/dream_theater_metropolis_pt_i_‘the_miracle_and_the_sleeper’.jpg"
+      }
+    }
+  ]
+}

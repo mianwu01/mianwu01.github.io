@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mian Wu</title>
+    <link rel="icon" type="image/jpeg" href="favicon.jpg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Georgia, 'Times New Roman', serif;
+            line-height: 1.7;
+            color: #e8d7d0;
+            background-color: #3d1e1e;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 60px;
+            font-size: 15px;
+        }
+
+        a {
+            color: #e8d7d0;
+            text-decoration: underline;
+            transition: opacity 0.2s;
+        }
+
+        a:hover {
+            opacity: 0.7;
+        }
+
+        /* Header Section */
+        .header {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 80px;
+            margin-bottom: 80px;
+        }
+
+        .left-column {
+            position: sticky;
+            top: 80px;
+            align-self: start;
+        }
+
+        .profile-photo {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            aspect-ratio: 3/4;
+            margin-bottom: 30px;
+            border: 1px solid #6b4545;
+        }
+
+        .profile-placeholder {
+            width: 100%;
+            max-width: 300px;
+            aspect-ratio: 3/4;
+            background: linear-gradient(135deg, #8b6b6b 0%, #6b4545 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #f5f0eb;
+            font-size: 64px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            border: 1px solid #6b4545;
+        }
+
+        .name {
+            font-size: 2em;
+            font-weight: normal;
+            margin-bottom: 12px;
+            color: #f5f0eb;
+        }
+
+        .chinese-name {
+            font-size: 1.5em;
+            font-weight: normal;
+            margin-bottom: 30px;
+            color: #e8d7d0;
+        }
+
+        .links {
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .links a {
+            margin-right: 8px;
+        }
+
+        .links span {
+            margin: 0 4px;
+        }
+
+        /* Right Column */
+        .right-column {
+            padding-top: 20px;
+        }
+
+        .greeting {
+            font-size: 2em;
+            margin-bottom: 30px;
+            font-weight: normal;
+            color: #f5f0eb;
+        }
+
+        .bio {
+            font-size: 1em;
+            margin-bottom: 30px;
+            line-height: 1.7;
+            color: #e8d7d0;
+        }
+
+        .bio strong {
+            font-weight: 600;
+            color: #f5f0eb;
+        }
+
+        /* Section */
+        .section {
+            margin-top: 80px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            font-weight: normal;
+            margin-bottom: 30px;
+            color: #f5f0eb;
+        }
+
+        /* Filter Buttons */
+        .filter-buttons {
+            margin-bottom: 30px;
+            font-size: 1em;
+        }
+
+        .filter-btn {
+            background: none;
+            border: none;
+            color: #e8d7d0;
+            cursor: pointer;
+            font-family: Georgia, serif;
+            font-size: 1em;
+            padding: 0;
+            margin-right: 12px;
+            text-decoration: none;
+        }
+
+        .filter-btn:hover {
+            opacity: 0.7;
+        }
+
+        .filter-btn.active {
+            text-decoration: underline;
+            font-weight: 600;
+            color: #f5f0eb;
+        }
+
+        .filter-separator {
+            margin: 0 6px;
+        }
+
+        /* Publications */
+        .publication {
+            margin-bottom: 30px;
+            padding: 24px;
+            background: #4a2828;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .publication:hover {
+            border-color: #8b6b6b;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .publication::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #d4a373;
+            transition: width 0.4s ease;
+        }
+
+        .publication:hover::before {
+            width: 100%;
+        }
+
+        .pub-title {
+            font-size: 1.05em;
+            font-weight: 600;
+            margin-bottom: 6px;
+            line-height: 1.5;
+            color: #f5f0eb;
+        }
+
+        .pub-authors {
+            font-size: 0.92em;
+            color: #c9b4a4;
+            margin-bottom: 4px;
+        }
+
+        .pub-authors .me {
+            font-weight: 600;
+            color: #e8d7d0;
+        }
+
+        .pub-venue {
+            font-size: 0.92em;
+            color: #c9b4a4;
+            margin-bottom: 10px;
+        }
+
+        .pub-badge {
+            display: inline-block;
+            background: #d4a373;
+            color: #2a1515;
+            padding: 2px 8px;
+            font-size: 0.7em;
+            margin-left: 8px;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            text-decoration: none;
+        }
+
+        /* Expandable content on hover */
+        .pub-details {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.4s ease, opacity 0.4s ease, margin-top 0.3s ease;
+            margin-top: 0;
+        }
+
+        .publication:hover .pub-details {
+            max-height: 300px;
+            opacity: 1;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #6b4545;
+        }
+
+        .pub-description {
+            color: #c9b4a4;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            font-size: 0.88em;
+        }
+
+        .pub-links {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            font-size: 0.85em;
+        }
+
+        .pub-links a {
+            text-decoration: underline;
+            transition: opacity 0.2s;
+        }
+
+        .pub-links a:hover {
+            opacity: 0.6;
+        }
+
+        .pub-links a::after {
+            content: '•';
+            margin-left: 8px;
+            margin-right: 4px;
+            color: #6b4545;
+        }
+
+        .pub-links a:last-child::after {
+            content: '';
+        }
+
+        /* News/Events */
+        .event {
+            margin-bottom: 30px;
+            font-size: 0.95em;
+            color: #e8d7d0;
+        }
+
+        .event.hidden {
+            display: none;
+        }
+
+        .event-date {
+            font-weight: 600;
+            margin-right: 6px;
+            color: #d4a373;
+        }
+
+        .show-more {
+            display: inline-block;
+            margin-top: 20px;
+            font-size: 0.95em;
+            cursor: pointer;
+            color: #d4a373;
+        }
+
+        .show-more.hidden {
+            display: none;
+        }
+
+        /* Research Interests */
+        .interests {
+            font-size: 1em;
+            line-height: 1.8;
+            color: #e8d7d0;
+        }
+
+        /* Education */
+        .education-item {
+            margin-bottom: 25px;
+            font-size: 0.95em;
+            color: #e8d7d0;
+        }
+
+        .edu-institution {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #f5f0eb;
+        }
+
+        /* Music Section */
+        .music-section {
+            margin-top: 80px;
+            padding: 40px;
+            background: #4a2828;
+            border: 1px solid #6b4545;
+            border-radius: 12px;
+        }
+
+        .music-title {
+            font-size: 1.5em;
+            font-weight: normal;
+            margin-bottom: 30px;
+            color: #f5f0eb;
+        }
+
+        .music-container {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .band-image-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .band-image {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border: 1px solid #6b4545;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #8b6b6b 0%, #6b4545 100%);
+        }
+
+        .album-cover {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border: 1px solid #6b4545;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #8b6b6b 0%, #6b4545 100%);
+        }
+
+        .music-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .band-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #f5f0eb;
+        }
+
+        .band-bio {
+            font-size: 0.92em;
+            color: #c9b4a4;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .song-title {
+            font-size: 1.05em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #d4a373;
+        }
+
+        .song-review {
+            font-size: 0.88em;
+            color: #c9b4a4;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .music-links {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            font-size: 0.9em;
+        }
+
+        .music-links a {
+            text-decoration: underline;
+        }
+
+        .shuffle-btn {
+            padding: 8px 20px;
+            background: #d4a373;
+            color: #2a1515;
+            border: none;
+            font-family: Georgia, serif;
+            font-size: 0.9em;
+            cursor: pointer;
+            display: inline-block;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+            align-self: flex-start;
+        }
+
+        .shuffle-btn:hover {
+            opacity: 0.85;
+            transform: scale(1.02);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 100px;
+            padding-top: 40px;
+            border-top: 1px solid #6b4545;
+            font-size: 0.85em;
+            color: #a89080;
+        }
+
+        /* Note */
+        .note {
+            font-size: 0.82em;
+            color: #a89080;
+            margin-top: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            body {
+                padding: 60px 30px;
+            }
+
+            .header {
+                grid-template-columns: 1fr;
+                gap: 50px;
+            }
+
+            .left-column {
+                position: static;
+            }
+
+            .profile-placeholder {
+                max-width: 250px;
+            }
+
+            .name {
+                font-size: 2em;
+            }
+
+            .chinese-name {
+                font-size: 1.6em;
+            }
+
+            .greeting {
+                font-size: 2em;
+            }
+
+            .music-container {
+                grid-template-columns: 1fr;
+            }
+
+            .band-image-container {
+                flex-direction: row;
+                gap: 12px;
+            }
+
+            .band-image,
+            .album-cover {
+                width: calc(50% - 6px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <!-- Left Column -->
+        <div class="left-column">
+            <img src="Mian.jpg" alt="Mian Wu" class="profile-photo">
+
+            <h1 class="name">Mian Wu</h1>
+            <div class="chinese-name">吴冕</div>
+
+            <div class="links">
+                <a href="https://x.com/MerlinNoth79247" target="_blank">X/Twitter</a> •
+                <a href="https://github.com/mianwu01" target="_blank">GitHub</a> •
+                <a href="https://scholar.google.com" target="_blank">Google Scholar</a> •
+                <a href="mailto:nothern@berkeley.edu">Email</a>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-column">
+            <div class="greeting">Hi 👋</div>
+
+            <div class="bio">
+                I'm a senior undergraduate student majoring in Electrical and Computer Engineering at <a href="https://en.sjtu.edu.cn/" target="_blank">Shanghai Jiao Tong University</a>. I am currently a visiting student and a member of the <a href="https://rail.eecs.berkeley.edu/" target="_blank">Robotic Artificial Intelligence and Learning Lab</a> at <a href="https://www.berkeley.edu/" target="_blank">UC Berkeley</a>, advised by <a href="https://people.eecs.berkeley.edu/~svlevine/" target="_blank">Sergey Levine</a>.
+            </div>
+
+            <div class="bio">
+                My recent research centers on scalable reinforcement learning with large language models and vision-language models. I am particularly interested in developing RL methods that improve the reasoning capabilities of agents and generalize to more complex free-form generation tasks.
+            </div>
+        </div>
+    </div>
+
+    <!-- Research Section -->
+    <div class="section">
+        <h2 class="section-title">Research</h2>
+
+        <div class="filter-buttons">
+            ( <button class="filter-btn active" data-filter="selected">Selected</button>
+            <span class="filter-separator">/</span>
+            <button class="filter-btn" data-filter="all">All</button> )
+        </div>
+
+        <div id="publications">
+            <!-- RLAC Paper -->
+            <div class="publication" data-selected="true">
+                <div class="pub-title">RLAC: Reinforcement Learning with Adversarial Critic for Free-Form Generation Tasks</div>
+                <div class="pub-authors"><span class="me">Mian Wu</span>, Gavin Zhang, Sewon Min, Sergey Levine, Aviral Kumar</div>
+                <div class="pub-venue">arXiv preprint, 2024</div>
+
+                <div class="pub-details">
+                    <div class="pub-description">
+                        We propose a post-training methodology for improving language models on open-ended generation tasks. Instead of relying on static reward models, RLAC trains a dynamic LLM critic alongside the generator using adversarial gameplay. The critic identifies the most likely failure modes which are then validated externally, adapting as the generator improves. We demonstrate improvements in factual accuracy for text generation and correctness for code generation across multiple benchmarks.
+                    </div>
+                    <div class="pub-links">
+                        <a href="https://arxiv.org/abs/2511.01758" target="_blank">Paper</a>
+                        <a href="https://mianwu01.github.io/RLAC_website/" target="_blank">Project</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events Section -->
+    <!-- Temporarily hidden
+    <div class="section">
+        <h2 class="section-title">Events</h2>
+
+        <div id="events">
+            <div class="event">
+                <span class="event-date">Nov, 2024</span>
+                Paper accepted to NeurIPS 2024.
+            </div>
+
+            <div class="event">
+                <span class="event-date">Oct, 2024</span>
+                <a href="#">Invited talk</a> at Stanford University on "Your Talk Topic".
+            </div>
+
+            <div class="event">
+                <span class="event-date">Sep, 2024</span>
+                Started new position as Research Scientist at [Company/Institution].
+            </div>
+
+            <div class="event hidden">
+                <span class="event-date">Aug, 2024</span>
+                Released open-source project with 1K+ stars.
+            </div>
+
+            <div class="event hidden">
+                <span class="event-date">Jul, 2024</span>
+                Attended ICML 2024 in Vienna.
+            </div>
+
+            <div class="event hidden">
+                <span class="event-date">Jun, 2024</span>
+                Paper accepted to CVPR 2024.
+            </div>
+        </div>
+
+        <a href="#" class="show-more" id="show-more-events">Earlier events...</a>
+    </div>
+    -->
+
+    <!-- Research Interests -->
+    <div class="section">
+        <h2 class="section-title">Research Interests</h2>
+        <div class="interests">
+            Machine Learning, Natural Language Processing, Computer Vision, AI Safety, Reinforcement Learning
+        </div>
+    </div>
+
+    <!-- Education -->
+    <div class="section">
+        <h2 class="section-title">Education</h2>
+
+        <div class="education-item">
+            <div class="edu-institution">B.S. in Electrical and Computer Engineering, Shanghai Jiao Tong University</div>
+            <div>2021 - 2024, 2025 - 2026</div>
+        </div>
+    </div>
+
+    <!-- Music Section -->
+    <div class="music-section">
+        <h2 class="music-title">Currently Listening To</h2>
+
+        <div class="bio" style="margin-bottom: 30px;">
+            I'm also a drummer who enjoys progressive, metal, and emo rock. I founded the band <strong>QaQqvq0.0</strong>.
+        </div>
+
+        <div class="music-container">
+            <div class="band-image-container">
+                <img id="band-image" class="band-image" alt="Band photo" />
+                <img id="album-cover" class="album-cover" alt="Album cover" />
+            </div>
+            <div class="music-content">
+                <div class="band-name" id="band-name">Loading...</div>
+                <div class="band-bio" id="band-bio">...</div>
+                <div class="song-title" id="song-title">...</div>
+                <div class="song-review" id="song-review">...</div>
+                <div class="music-links">
+                    <a href="#" id="spotify-link" target="_blank">Spotify</a>
+                    <a href="#" id="youtube-link" target="_blank">YouTube</a>
+                </div>
+                <button class="shuffle-btn" onclick="shuffleBand()">Discover Another Band</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        © 2024 Mian Wu. Last updated: November 2024
+    </footer>
+
+    <script>
+        // Load bands data from JSON
+        let bandsData = [];
+        let currentBandIndex = 0;
+
+        async function loadBandsData() {
+            try {
+                const response = await fetch('bands_data.json');
+                const data = await response.json();
+                bandsData = data.bands;
+                shuffleBand(); // Initialize with random band
+            } catch (error) {
+                console.error('Error loading bands data:', error);
+                // Fallback data if JSON fails to load
+                bandsData = [
+                    {
+                        name: "Loading...",
+                        bio: "Unable to load music data. Please check bands_data.json file.",
+                        bandImage: "images/bands/placeholder.jpg",
+                        recommendedSong: {
+                            title: "...",
+                            review: "...",
+                            albumCover: "images/albums/placeholder.jpg"
+                        }
+                    }
+                ];
+                updateDisplay();
+            }
+        }
+
+        function shuffleBand() {
+            if (bandsData.length === 0) return;
+            currentBandIndex = Math.floor(Math.random() * bandsData.length);
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const band = bandsData[currentBandIndex];
+
+            // Update band info
+            document.getElementById('band-name').textContent = band.name;
+            document.getElementById('band-bio').textContent = band.bio;
+
+            // Update song info
+            document.getElementById('song-title').textContent = `🎵 ${band.recommendedSong.title}`;
+            document.getElementById('song-review').textContent = band.recommendedSong.review;
+
+            // Update images
+            document.getElementById('band-image').src = band.bandImage;
+            document.getElementById('album-cover').src = band.recommendedSong.albumCover;
+
+            // Generate search URLs (these will work even if user doesn't have streaming accounts)
+            const searchQuery = encodeURIComponent(`${band.name} ${band.recommendedSong.title}`);
+            document.getElementById('spotify-link').href = `https://open.spotify.com/search/${searchQuery}`;
+            document.getElementById('youtube-link').href = `https://www.youtube.com/results?search_query=${searchQuery}`;
+        }
+
+        // Load data when page loads
+        loadBandsData();
+
+        // Publication filter
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const publications = document.querySelectorAll('.publication');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                const filter = this.dataset.filter;
+
+                publications.forEach(pub => {
+                    if (filter === 'all') {
+                        pub.style.display = 'block';
+                    } else if (filter === 'selected') {
+                        pub.style.display = pub.dataset.selected === 'true' ? 'block' : 'none';
+                    }
+                });
+            });
+        });
+
+        // Show more events
+        const showMoreBtn = document.getElementById('show-more-events');
+        const events = document.querySelectorAll('.event');
+
+        if (showMoreBtn) {
+            showMoreBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                events.forEach(event => {
+                    event.classList.remove('hidden');
+                });
+                this.classList.add('hidden');
+            });
+        }
+
+        // Initialize - show only selected publications
+        publications.forEach(pub => {
+            if (pub.dataset.selected !== 'true') {
+                pub.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
