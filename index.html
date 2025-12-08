@@ -86,15 +86,25 @@
 
         .links {
             font-size: 0.95em;
-            line-height: 1.6;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .links a {
-            margin-right: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
         }
 
-        .links span {
-            margin: 0 4px;
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .link-icon {
+            width: 18px;
+            height: 18px;
         }
 
         /* Right Column */
@@ -164,7 +174,7 @@
         .filter-btn {
             background: none;
             border: none;
-            color: #a0a47e;
+            color: #b7c195;
             cursor: pointer;
             font-family: Georgia, serif;
             font-size: 1em;
@@ -180,12 +190,12 @@
         .filter-btn.active {
             text-decoration: underline;
             font-weight: 600;
-            color: #a0a47e;
+            color: #b7c195;
         }
 
         .filter-separator {
             margin: 0 6px;
-            color: #a0a47e;
+            color: #b7c195;
         }
 
         /* Publications */
@@ -456,7 +466,7 @@
         }
 
         .music-links a {
-            color: #a0a47e;
+            color: #b7c195;
             text-decoration: underline;
         }
 
@@ -554,10 +564,10 @@
             <div class="chinese-name">Modeling the World</div>
 
             <div class="links">
-                <a href="https://x.com/MerlinNoth79247" target="_blank">X/Twitter</a> •
-                <a href="https://github.com/mianwu01" target="_blank">GitHub</a> •
-                <a href="https://scholar.google.com/citations?user=UH20kVIAAAAJ&hl" target="_blank">Google Scholar</a> •
-                <a href="mailto:nothern@berkeley.edu">Email</a>
+                <a href="https://x.com/MerlinNoth79247" target="_blank"><img src="X.svg" alt="X" class="link-icon">X/Twitter</a>
+                <a href="https://github.com/mianwu01" target="_blank"><img src="GitHub.svg" alt="GitHub" class="link-icon">GitHub</a>
+                <a href="https://scholar.google.com/citations?user=UH20kVIAAAAJ&hl" target="_blank"><img src="Google Scholar.svg" alt="Google Scholar" class="link-icon">Google Scholar</a>
+                <a href="mailto:nothern@berkeley.edu"><img src="Email.svg" alt="Email" class="link-icon">Email</a>
             </div>
         </div>
 
