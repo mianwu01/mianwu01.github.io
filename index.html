@@ -131,12 +131,35 @@
             font-weight: normal;
             margin-bottom: 30px;
             color: #f5f0eb;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 1.2em;
+            background: #d4a373;
+            border-radius: 2px;
+        }
+
+        /* Section Header with Title and Filter */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .section-header .section-title {
+            margin-bottom: 0;
         }
 
         /* Filter Buttons */
         .filter-buttons {
-            margin-bottom: 30px;
-            font-size: 1em;
+            font-size: 0.9em;
         }
 
         .filter-btn {
@@ -348,6 +371,18 @@
             font-weight: normal;
             margin-bottom: 30px;
             color: #f5f0eb;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .music-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 1.2em;
+            background: #d4a373;
+            border-radius: 2px;
         }
 
         .music-container {
@@ -422,6 +457,7 @@
         }
 
         .music-links a {
+            color: #a0a47e;
             text-decoration: underline;
         }
 
@@ -521,7 +557,7 @@
             <div class="links">
                 <a href="https://x.com/MerlinNoth79247" target="_blank">X/Twitter</a> •
                 <a href="https://github.com/mianwu01" target="_blank">GitHub</a> •
-                <a href="https://scholar.google.com" target="_blank">Google Scholar</a> •
+                <a href="https://scholar.google.com/citations?user=UH20kVIAAAAJ&hl" target="_blank">Google Scholar</a> •
                 <a href="mailto:nothern@berkeley.edu">Email</a>
             </div>
         </div>
@@ -542,12 +578,13 @@
 
     <!-- Research Section -->
     <div class="section">
-        <h2 class="section-title">Research</h2>
-
-        <div class="filter-buttons">
-            ( <button class="filter-btn active" data-filter="selected">Selected</button>
-            <span class="filter-separator">/</span>
-            <button class="filter-btn" data-filter="all">All</button> )
+        <div class="section-header">
+            <h2 class="section-title">Research</h2>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="selected">SELECTED</button>
+                <span class="filter-separator">|</span>
+                <button class="filter-btn" data-filter="all">ALL</button>
+            </div>
         </div>
 
         <div id="publications">
