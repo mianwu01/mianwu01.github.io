@@ -1,0 +1,1150 @@
+<title>SE-SFT 分布锐化诊断</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700;900&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --surface: #fcfdfe;
+    --surface-2: #eef1f5;
+    --ink: #171a20;
+    --ink-2: #555b66;
+    --ink-3: #878d99;
+    --rule: #e2e5eb;
+    --rule-strong: #c6ccd6;
+    --accent: #2a78d6;
+    --accent-deep: #1c5cab;
+    --accent-wash: rgba(42, 120, 214, 0.08);
+    --warn-edge: #b97f10;
+    --warn-wash: rgba(237, 161, 0, 0.09);
+    --s1: #2a78d6;
+    --s2: #eb6834;
+    --s3: #1baf7a;
+    --s4: #eda100;
+    --s5: #e87ba4;
+    --s6: #008300;
+    --grid: #e4e7ec;
+    --shadow: 0 1px 2px rgba(23, 26, 32, 0.05), 0 6px 20px rgba(23, 26, 32, 0.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #101319;
+      --surface: #1a1e26;
+      --surface-2: #212630;
+      --ink: #e9ebf0;
+      --ink-2: #a7aeba;
+      --ink-3: #7b8290;
+      --rule: #2a303b;
+      --rule-strong: #3c4350;
+      --accent: #3987e5;
+      --accent-deep: #74abec;
+      --accent-wash: rgba(57, 135, 229, 0.13);
+      --warn-edge: #d9ab3c;
+      --warn-wash: rgba(201, 133, 0, 0.14);
+      --s1: #3987e5;
+      --s2: #d95926;
+      --s3: #199e70;
+      --s4: #c98500;
+      --s5: #d55181;
+      --s6: #008300;
+      --grid: #272d38;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #101319;
+    --surface: #1a1e26;
+    --surface-2: #212630;
+    --ink: #e9ebf0;
+    --ink-2: #a7aeba;
+    --ink-3: #7b8290;
+    --rule: #2a303b;
+    --rule-strong: #3c4350;
+    --accent: #3987e5;
+    --accent-deep: #74abec;
+    --accent-wash: rgba(57, 135, 229, 0.13);
+    --warn-edge: #d9ab3c;
+    --warn-wash: rgba(201, 133, 0, 0.14);
+    --s1: #3987e5;
+    --s2: #d95926;
+    --s3: #199e70;
+    --s4: #c98500;
+    --s5: #d55181;
+    --s6: #008300;
+    --grid: #272d38;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    font-size: 15.5px;
+    line-height: 1.9;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition: none !important; }
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 24px 96px; }
+  p, ul, ol { max-width: 720px; }
+  ul, ol { padding-left: 1.4em; }
+  li { margin: 4px 0; }
+  a { color: var(--accent-deep); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+  strong { font-weight: 700; }
+  em { font-style: normal; font-weight: 700; color: var(--accent-deep); }
+  code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.86em;
+    background: var(--surface-2);
+    padding: 1px 6px;
+    border-radius: 5px;
+  }
+  section { scroll-margin-top: 24px; }
+
+  /* ---------- header ---------- */
+  header.masthead { padding-top: 64px; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    color: var(--accent-deep);
+    text-transform: uppercase;
+  }
+  h1 {
+    font-family: "Noto Serif SC", "Songti SC", Georgia, serif;
+    font-weight: 900;
+    font-size: clamp(30px, 5.4vw, 44px);
+    line-height: 1.35;
+    margin: 10px 0 14px;
+    letter-spacing: 0.01em;
+    text-wrap: balance;
+  }
+  .lede { font-size: 17px; color: var(--ink-2); max-width: 680px; margin: 0 0 30px; }
+  .lede b { color: var(--ink); }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 26px 0 30px;
+  }
+  .tile {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 14px 16px 12px;
+    box-shadow: var(--shadow);
+  }
+  .tile .t-label { font-size: 12px; color: var(--ink-3); line-height: 1.5; }
+  .tile .t-value { font-size: 24px; font-weight: 700; line-height: 1.4; margin: 2px 0; }
+  .tile .t-value small { font-size: 14px; font-weight: 500; color: var(--ink-3); }
+  .tile .t-sub { font-size: 12px; color: var(--ink-2); line-height: 1.55; }
+
+  nav.toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+    padding: 14px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    font-size: 13px;
+  }
+  nav.toc a { color: var(--ink-2); }
+  nav.toc a b {
+    font-family: "Noto Serif SC", serif;
+    color: var(--accent-deep);
+    margin-right: 5px;
+    font-weight: 700;
+  }
+
+  /* ---------- sections ---------- */
+  section { margin-top: 76px; }
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12.5px;
+    color: var(--ink-3);
+    letter-spacing: 0.12em;
+  }
+  .knum {
+    font-family: "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--accent-deep);
+    background: var(--accent-wash);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0;
+  }
+  h2 {
+    font-family: "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: 26px;
+    line-height: 1.5;
+    margin: 10px 0 16px;
+    text-wrap: balance;
+  }
+  h3 {
+    font-family: "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: 18.5px;
+    margin: 40px 0 10px;
+  }
+  h3 .hn {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-3);
+    margin-right: 8px;
+    vertical-align: 2px;
+  }
+
+  /* ---------- tables ---------- */
+  .table-scroll {
+    overflow-x: auto;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin: 18px 0 6px;
+  }
+  table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 13.5px; }
+  caption {
+    text-align: left;
+    font-size: 12.5px;
+    color: var(--ink-3);
+    padding: 12px 16px 0;
+  }
+  th {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    color: var(--ink-3);
+    text-align: right;
+    padding: 12px 14px 8px;
+    border-bottom: 1px solid var(--rule-strong);
+    white-space: nowrap;
+  }
+  th:first-child, td:first-child { text-align: left; }
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--rule);
+    text-align: right;
+    white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: none; }
+  td.n { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  tr.hl td { background: var(--accent-wash); }
+  tr.base td { color: var(--ink-2); }
+  tr.base td:first-child { color: var(--ink); }
+  td b, th b { font-weight: 700; color: var(--ink); }
+  .tnote { font-size: 12.5px; color: var(--ink-3); margin: 8px 2px 0; max-width: 760px; }
+  .dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--c);
+    margin-right: 8px;
+  }
+
+  /* ---------- figures ---------- */
+  figure.fig {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 20px 22px 16px;
+    box-shadow: var(--shadow);
+    margin: 22px 0;
+  }
+  .fig-title { font-size: 14px; font-weight: 700; margin: 0 0 2px; }
+  .fig-sub { font-size: 12px; color: var(--ink-3); margin: 0 0 10px; }
+  figcaption { font-size: 12.5px; color: var(--ink-3); margin-top: 12px; line-height: 1.75; max-width: 760px; }
+  .fig svg { max-width: 100%; height: auto; display: block; }
+  .fig-scroll { overflow-x: auto; }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    font-size: 12px;
+    color: var(--ink-2);
+    margin: 6px 0 16px;
+  }
+  .legend span { display: inline-flex; align-items: center; }
+  .legend .dot { width: 8px; height: 8px; }
+
+  /* grouped vertical bars */
+  .gchart { --u: 2px; min-width: 540px; }
+  .gplot { position: relative; height: 200px; margin: 30px 6px 0 44px; }
+  .gline { position: absolute; left: 0; right: 0; bottom: calc(var(--g) * var(--u)); border-top: 1px solid var(--grid); }
+  .gline span {
+    position: absolute;
+    left: -40px;
+    top: -9px;
+    width: 34px;
+    text-align: right;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    color: var(--ink-3);
+  }
+  .gplot::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; border-top: 1px solid var(--rule-strong); }
+  .ggroups { position: absolute; inset: 0; display: flex; justify-content: space-around; align-items: flex-end; }
+  .ggroup { display: flex; gap: 10px; align-items: flex-end; }
+  .gbar {
+    width: 22px;
+    height: calc(var(--v) * var(--u));
+    background: var(--c);
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    z-index: 1;
+  }
+  .gbar .v {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+  .gbar:hover::after, .gbar:focus-visible::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 22px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--bg);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    padding: 3px 9px;
+    border-radius: 6px;
+    white-space: nowrap;
+    z-index: 5;
+  }
+  .gxlabs { display: flex; justify-content: space-around; margin: 8px 6px 0 44px; }
+  .gxlabs span { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--ink-2); }
+
+  /* horizontal bars */
+  .hchart { min-width: 540px; }
+  .hrow { display: grid; grid-template-columns: 210px 1fr 76px; align-items: center; gap: 12px; margin: 8px 0; }
+  .hname { font-size: 12.5px; color: var(--ink-2); display: flex; align-items: center; white-space: nowrap; }
+  .htrack { position: relative; height: 18px; }
+  .hfill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: calc(var(--v) / 7 * 100%);
+    background: var(--c);
+    border-radius: 0 4px 4px 0;
+  }
+  .hfill i {
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    font-style: normal;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+  .hval { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--ink-2); text-align: right; }
+
+  /* diverging bars */
+  .dgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .dpanel h4 { font-size: 12.5px; margin: 0 0 2px; }
+  .dpanel .dsub { font-size: 11px; color: var(--ink-3); margin: 0 0 12px; font-family: "IBM Plex Mono", monospace; }
+  .drow { display: grid; grid-template-columns: 92px 1fr 46px; align-items: center; gap: 10px; margin: 9px 0; }
+  .drow .dn { font-size: 12px; color: var(--ink-2); white-space: nowrap; }
+  .dtrack { display: grid; grid-template-columns: 1fr 1fr; height: 16px; position: relative; }
+  .dtrack::after { content: ""; position: absolute; left: 50%; top: -5px; bottom: -5px; width: 1px; background: var(--rule-strong); }
+  .dneg, .dpos { position: relative; }
+  .dneg b { position: absolute; right: 0; top: 0; bottom: 0; width: var(--w); background: var(--c); border-radius: 4px 0 0 4px; }
+  .dpos b { position: absolute; left: 0; top: 0; bottom: 0; width: var(--w); background: var(--c); border-radius: 0 4px 4px 0; }
+  .dval { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-align: right; font-variant-numeric: tabular-nums; }
+  .dval.neg { color: var(--ink); }
+
+  /* token strip */
+  .tokwrap { margin: 16px 0; max-width: 760px; }
+  .tokrow { display: flex; align-items: stretch; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+  .tokrow .tag {
+    flex: 0 0 46px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    color: var(--ink-3);
+    display: flex;
+    align-items: center;
+  }
+  .tok { padding: 9px 14px; border-radius: 9px; font-size: 12.5px; line-height: 1.6; border: 1px solid var(--rule); background: var(--surface); }
+  .tok small { display: block; font-size: 11px; color: var(--ink-3); }
+  .tok.masked { border-style: dashed; border-color: var(--rule-strong); color: var(--ink-3); background: transparent; }
+  .tok.loss { border-color: var(--accent); background: var(--accent-wash); }
+  .tok.plain { background: var(--surface-2); }
+
+  /* callouts */
+  .note, .warnbox {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-wash);
+    padding: 14px 20px;
+    border-radius: 0 10px 10px 0;
+    margin: 20px 0;
+    max-width: 720px;
+    font-size: 14px;
+  }
+  .warnbox { border-left-color: var(--warn-edge); background: var(--warn-wash); }
+  .verdict {
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--accent);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    border-radius: 0 12px 12px 0;
+    padding: 24px 30px;
+    margin: 28px 0;
+    max-width: 760px;
+    font-family: "Noto Serif SC", serif;
+    font-size: 16.5px;
+    line-height: 2.05;
+  }
+  .verdict .vlabel {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--accent-deep);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .math {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
+    padding: 13px 18px;
+    border-radius: 10px;
+    overflow-x: auto;
+    max-width: 720px;
+    margin: 14px 0;
+    white-space: nowrap;
+  }
+  .math sub, .math sup { font-size: 10px; }
+
+  /* spec card */
+  .spec { border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow); margin: 18px 0; max-width: 760px; }
+  .spec-row { display: grid; grid-template-columns: 205px 1fr; }
+  .spec-row + .spec-row { border-top: 1px solid var(--rule); }
+  .spec-key {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--accent-deep);
+    padding: 13px 18px;
+    background: var(--surface-2);
+    display: flex;
+    align-items: flex-start;
+  }
+  .spec-val { padding: 13px 18px; font-size: 13.5px; line-height: 1.8; color: var(--ink-2); }
+  .spec-val b { color: var(--ink); }
+
+  /* mixture strip */
+  .mix { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 18px 0; }
+  .mix > div { border: 1px solid var(--rule); background: var(--surface); border-radius: 11px; padding: 13px 15px; font-size: 12.5px; line-height: 1.7; color: var(--ink-2); box-shadow: var(--shadow); }
+  .mix b { display: block; font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.05em; color: var(--accent-deep); margin-bottom: 5px; }
+
+  footer {
+    margin-top: 90px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    font-size: 12.5px;
+    color: var(--ink-3);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 720px) {
+    .tiles { grid-template-columns: 1fr 1fr; }
+    .dgrid { grid-template-columns: 1fr; }
+    .spec-row { grid-template-columns: 1fr; }
+    .spec-key { padding-bottom: 0; background: transparent; }
+    .spec-val { padding-top: 4px; }
+    .mix { grid-template-columns: 1fr 1fr; }
+    .hrow { grid-template-columns: 150px 1fr 66px; }
+    .verdict { padding: 18px 20px; font-size: 15.5px; }
+  }
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <div class="eyebrow">SE-SFT 评估分析 · Dev 200 × Bucket-0 457</div>
+  <h1>SE-SFT 分布锐化诊断</h1>
+  <p class="lede">当前 SE-SFT 配方在 bucket-0 上带来<b>真实的 hard-capability 改善</b>，但以 <b>Dev 长尾覆盖的轻微收缩</b>为代价——这是概率集中、CoT 缩短与少量遗忘的叠加，而不是整体 coding 能力的下降。</p>
+
+  <div class="tiles">
+    <div class="tile">
+      <div class="t-label">Dev 200 · Solved</div>
+      <div class="t-value">189 <small>→ 185–188</small></div>
+      <div class="t-sub">Base → 三个 SE-SFT 模型，长尾覆盖轻微收缩</div>
+    </div>
+    <div class="tile">
+      <div class="t-label">Bucket-0 457 · Solved</div>
+      <div class="t-value">20 <small>→ 29</small></div>
+      <div class="t-sub">Base → hp778，hard capability 真实提升</div>
+    </div>
+    <div class="tile">
+      <div class="t-label">McNemar p 值</div>
+      <div class="t-value">≥ 0.125</div>
+      <div class="t-sub">Dev 退化在三个模型上均不具统计显著性</div>
+    </div>
+    <div class="tile">
+      <div class="t-label">丢题集中度</div>
+      <div class="t-value">5/6 · 5/6 · 5/7</div>
+      <div class="t-sub">三个模型的丢题绝大多数来自最难的 Dev 1–3</div>
+    </div>
+  </div>
+
+  <nav class="toc">
+    <a href="#s1"><b>一</b>现象：退化局部且不显著</a>
+    <a href="#s2"><b>二</b>成因：五个结构性问题</a>
+    <a href="#s3"><b>三</b>澄清：bucket-0 与 Dev 1–3</a>
+    <a href="#s4"><b>四</b>完整数据</a>
+    <a href="#s5"><b>五</b>修复方案：family-balanced 蒸馏</a>
+  </nav>
+</header>
+
+<!-- ================= 一 ================= -->
+<section id="s1">
+  <div class="kicker"><span class="knum">一</span>现象</div>
+  <h2>退化是真实的，但很局部、且未达统计显著</h2>
+  <p>核心原因不是「SE 普遍破坏了 Dev 能力」，而是当前这套 SE-SFT 配方会<em>轻微收缩模型的长尾覆盖</em>：正确概率更集中到一部分题上，因此 pass@1 可以持平甚至上升，但原本只有小概率能解出的边界题变成 0/16，导致 pass@16 和 solved 下降。</p>
+
+  <h3><span class="hn">1.1</span>逐题比较：退化其实很局部</h3>
+  <div class="table-scroll">
+    <table>
+      <caption>以同协议的 Base floor=7300 为基准（Dev 200）</caption>
+      <thead><tr><th>模型</th><th>新解出的题</th><th>从 Base 丢掉的题</th><th>净 solved</th><th>McNemar p</th></tr></thead>
+      <tbody>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>标准 SE E1</td><td class="n">2</td><td class="n">6</td><td class="n">−4</td><td class="n">0.289</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s3)"></span>hp778</td><td class="n">1</td><td class="n">6</td><td class="n">−5</td><td class="n">0.125</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s4)"></span>bucket-0 refit50</td><td class="n">5</td><td class="n">7</td><td class="n">−2</td><td class="n">0.774</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="tnote">这些差异目前都没有统计显著性，不能下结论说「所有 SE 必然降低 Dev」。</p>
+  <ul>
+    <li>标准 SE 的 6 道损失中，<b>5 道来自最难的 Dev 1–3</b>；hp778 同样是 5/6 来自 Dev 1–3。</li>
+    <li>refit50 是 5/7 来自 Dev 1–3，另外两道来自 4–7。</li>
+    <li><b>8–11 和 12–15 完全没有丢题</b>。</li>
+    <li>三个模型<b>没有一道「共同丢失」的题</b>。</li>
+  </ul>
+  <p>所以这不是一种稳定、统一的技能被破坏，而是<em>边界问题上的概率重新分配</em>和采样波动。</p>
+
+  <h3><span class="hn">1.2</span>最直接的证据：正确 samples 增多，但覆盖题数减少</h3>
+  <div class="table-scroll">
+    <table>
+      <caption>与 Base floor=0 比较（每模型 3,200 个 samples = 200 题 × 16 次）</caption>
+      <thead><tr><th>模型</th><th>3,200 samples 中正确数</th><th>pass@1</th><th>Solved</th></tr></thead>
+      <tbody>
+        <tr class="base"><td><span class="dot" style="--c:var(--s1)"></span>Base floor=0</td><td class="n">1,595</td><td class="n">49.844%</td><td class="n">189</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>标准 SE E1</td><td class="n">1,568</td><td class="n">49.000%</td><td class="n">186</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s3)"></span>hp778</td><td class="n">1,601</td><td class="n">50.031%</td><td class="n">185</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s4)"></span>bucket-0 refit50</td><td class="n">1,614</td><td class="n">50.438%</td><td class="n">188</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <figure class="fig">
+    <p class="fig-title">相对 Base floor=0 的变化量：正确 sample 与覆盖题数背离</p>
+    <p class="fig-sub">hp778 比 Base 多 6 个正确 sample，却少覆盖 4 道题；refit50 多 19 个正确 sample，仍少覆盖 1 道题</p>
+    <div class="dgrid">
+      <div class="dpanel">
+        <h4>Δ 正确 samples（共 3,200）</h4>
+        <p class="dsub">满刻度 ±30</p>
+        <div class="drow"><span class="dn">标准 SE E1</span><div class="dtrack"><span class="dneg"><b style="--w:90%;--c:var(--s2)"></b></span><span class="dpos"></span></div><span class="dval neg">−27</span></div>
+        <div class="drow"><span class="dn">hp778</span><div class="dtrack"><span class="dneg"></span><span class="dpos"><b style="--w:20%;--c:var(--s3)"></b></span></div><span class="dval">+6</span></div>
+        <div class="drow"><span class="dn">refit50</span><div class="dtrack"><span class="dneg"></span><span class="dpos"><b style="--w:63.3%;--c:var(--s4)"></b></span></div><span class="dval">+19</span></div>
+      </div>
+      <div class="dpanel">
+        <h4>Δ 覆盖题数（Solved，共 200）</h4>
+        <p class="dsub">满刻度 ±5</p>
+        <div class="drow"><span class="dn">标准 SE E1</span><div class="dtrack"><span class="dneg"><b style="--w:60%;--c:var(--s2)"></b></span><span class="dpos"></span></div><span class="dval neg">−3</span></div>
+        <div class="drow"><span class="dn">hp778</span><div class="dtrack"><span class="dneg"><b style="--w:80%;--c:var(--s3)"></b></span><span class="dpos"></span></div><span class="dval neg">−4</span></div>
+        <div class="drow"><span class="dn">refit50</span><div class="dtrack"><span class="dneg"><b style="--w:20%;--c:var(--s4)"></b></span><span class="dpos"></span></div><span class="dval neg">−1</span></div>
+      </div>
+    </div>
+    <figcaption>正确 sample 总量上升而覆盖题数下降，说明正确概率在向部分题集中——pass@1 上升并不保证 pass@16 / solved 上升。</figcaption>
+  </figure>
+
+  <figure class="fig">
+    <p class="fig-title">分布锐化的机制</p>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 680 268" role="img" aria-label="示意图：SFT 后部分题成功概率升高，而原本低概率的边界题降到接近零" style="min-width:560px">
+      <text x="16" y="20" font-size="11" fill="var(--ink-3)">各题成功概率（示意）</text>
+      <text x="16" y="82" font-size="12" font-weight="600" fill="var(--ink)">Base</text>
+      <g fill="var(--ink-3)" opacity="0.55">
+        <rect x="90"  y="54" width="24" height="50" rx="2"></rect>
+        <rect x="132" y="64" width="24" height="40" rx="2"></rect>
+        <rect x="174" y="60" width="24" height="44" rx="2"></rect>
+        <rect x="216" y="74" width="24" height="30" rx="2"></rect>
+        <rect x="258" y="70" width="24" height="34" rx="2"></rect>
+        <rect x="300" y="82" width="24" height="22" rx="2"></rect>
+        <rect x="342" y="78" width="24" height="26" rx="2"></rect>
+        <rect x="384" y="88" width="24" height="16" rx="2"></rect>
+        <rect x="426" y="92" width="24" height="12" rx="2"></rect>
+        <rect x="468" y="95" width="24" height="9"  rx="2"></rect>
+        <rect x="510" y="97" width="24" height="7"  rx="2"></rect>
+        <rect x="552" y="99" width="24" height="5"  rx="2"></rect>
+      </g>
+      <text x="501" y="82" font-size="11" fill="var(--ink-3)" text-anchor="middle">低概率长尾</text>
+      <line x1="84" y1="104" x2="600" y2="104" stroke="var(--rule-strong)"></line>
+
+      <text x="16" y="200" font-size="12" font-weight="600" fill="var(--ink)">SFT 后</text>
+      <text x="90" y="150" font-size="11" fill="var(--ink-2)">成功概率更集中 → pass@1 持平或 ↑</text>
+      <g fill="var(--accent)">
+        <rect x="90"  y="164" width="24" height="60" rx="2"></rect>
+        <rect x="132" y="172" width="24" height="52" rx="2"></rect>
+        <rect x="174" y="169" width="24" height="55" rx="2"></rect>
+        <rect x="216" y="184" width="24" height="40" rx="2"></rect>
+        <rect x="258" y="179" width="24" height="45" rx="2"></rect>
+        <rect x="300" y="194" width="24" height="30" rx="2"></rect>
+        <rect x="342" y="190" width="24" height="34" rx="2"></rect>
+      </g>
+      <rect x="384" y="218" width="24" height="6" rx="2" fill="var(--ink-3)" opacity="0.55"></rect>
+      <g fill="none" stroke="var(--ink-3)" stroke-dasharray="3 3">
+        <rect x="426" y="212" width="24" height="12" rx="2"></rect>
+        <rect x="468" y="215" width="24" height="9"  rx="2"></rect>
+        <rect x="510" y="217" width="24" height="7"  rx="2"></rect>
+        <rect x="552" y="219" width="24" height="5"  rx="2"></rect>
+      </g>
+      <text x="600" y="182" font-size="11" fill="var(--ink-2)" text-anchor="end">原本 1/16 级的稀有成功 → 0</text>
+      <text x="600" y="198" font-size="11" fill="var(--ink-3)" text-anchor="end">pass@16 与 solved 因此下降</text>
+      <line x1="84" y1="224" x2="600" y2="224" stroke="var(--rule-strong)"></line>
+    </svg>
+    </div>
+    <figcaption>Base 在很多题上都有一点成功概率；SFT 后部分题成功概率提高（左侧实心柱），而部分低概率边界题降到接近零（右侧虚线轮廓）。这正是典型的分布锐化。</figcaption>
+  </figure>
+</section>
+
+<!-- ================= 二 ================= -->
+<section id="s2">
+  <div class="kicker"><span class="knum">二</span>成因</div>
+  <h2>当前 SE-SFT 配方的五个结构性问题</h2>
+
+  <h3><span class="hn">2.1</span>SFT 优化目标和 pass@16 不一致</h3>
+  <p>当前 K1 SFT 每题主要模仿<b>一条</b>被筛选出的正确答案。交叉熵目标只要求提高这条轨迹的似然，并不奖励：</p>
+  <ul>
+    <li>保留 Base 的其他算法模式；</li>
+    <li>16 次采样覆盖不同解法；</li>
+    <li>保留某道题原本只有 1/16 的稀有成功模式。</li>
+  </ul>
+  <p>拒绝采样选出的答案确实更好，但「答案质量更高」不等于「学生的解法分布更广」。</p>
+
+  <h3><span class="hn">2.2</span>训练没有直接监督自主 thinking</h3>
+  <p>这些 native-final 模型使用 <code>loss_scope = final</code>：原生 <code>assistant.thinking</code> 出现在 teacher-forced 上下文中，但 thinking token 被 mask。也就是说，模型训练时是在正确思考轨迹之后学习输出 final，却<em>没有被直接训练如何自主生成这条思考轨迹</em>。</p>
+  <div class="tokwrap">
+    <div class="tokrow">
+      <span class="tag">训练</span>
+      <span class="tok plain">prompt</span>
+      <span class="tok masked">正确的 assistant.thinking<small>teacher-forced · token 被 mask，无 loss</small></span>
+      <span class="tok loss">final<small>唯一计算 loss 的部分</small></span>
+    </div>
+    <div class="tokrow">
+      <span class="tag">测试</span>
+      <span class="tok plain">prompt</span>
+      <span class="tok">自己生成的 thinking<small>往往更短、分布不同</small></span>
+      <span class="tok">final<small>照常自信输出</small></span>
+    </div>
+  </div>
+  <p>测试时模型必须自己生成 analysis，于是容易出现「训练：正确 thinking → 学习正确 final；测试：自己产生较短/不同的 thinking → 自信地产生 final」。这也解释了为什么 SFT 常常改善代码格式，却未必改善推理覆盖。</p>
+
+  <h3><span class="hn">2.3</span>同为 floor=7300，实际 thinking compute 并未真正匹配</h3>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>模型</th><th>Dev mean thinking</th><th>达到 max_forces=24 的比例</th></tr></thead>
+      <tbody>
+        <tr class="base"><td><span class="dot" style="--c:var(--s1)"></span>Base floor=7300</td><td class="n">5,587</td><td class="n">68.6%</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>标准 SE E1</td><td class="n">4,806</td><td class="n">76.0%</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s3)"></span>hp778</td><td class="n">4,814</td><td class="n">75.9%</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s4)"></span>bucket-0 refit50</td><td class="n">5,002</td><td class="n">74.7%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>SFT 模型虽然更频繁地被强制继续，但仍更早结束；很多样本撞到 max_forces=24，协议无法真正把它们推到 7300 tokens。所以相同的 floor=7300 标签<em>不等于相同的实际思考预算</em>。标准 SE / hp778 比 Base 少约 14% 的 mean thinking，这很可能进一步伤害最难的 Dev 1–3。</p>
+
+  <h3><span class="hn">2.4</span>三个「不同 SE」其实共享同一种训练缺陷</h3>
+  <p>它们并不是三种独立方法：</p>
+  <ul>
+    <li>标准 SE 和 hp778 使用<b>同一套 <code>se_k1_native_final</code> 数据与 final-only loss</b>，只改变剂量和超参数。</li>
+    <li>bucket-0 refit 使用其中 794 条 bucket-0 子集，仍然是 final-only loss。</li>
+    <li>K1 每题只有一条目标轨迹。</li>
+    <li>SE evolution 输出的格式并不统一，很多 loop≥1 样本是较短、偏代码式 final。</li>
+  </ul>
+  <p>因此<em>超参数只能减轻遗忘，不能修复目标函数和数据格式的共同问题</em>。</p>
+
+  <h3><span class="hn">2.5</span>训练剂量确实存在遗忘趋势</h3>
+  <figure class="fig">
+    <p class="fig-title">bucket-0-only 内部消融：Dev pass@16 随训练 epochs 单调下滑</p>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 680 240" role="img" aria-label="折线图：Dev pass@16 从 Base 的 94.0% 随 epochs 增加降到 15.6 epochs 时的 90.5%" style="min-width:560px">
+      <g stroke="var(--grid)">
+        <line x1="46" y1="46.7"  x2="650" y2="46.7"></line>
+        <line x1="46" y1="100"   x2="650" y2="100"></line>
+        <line x1="46" y1="153.3" x2="650" y2="153.3"></line>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--ink-3)" text-anchor="end">
+        <text x="40" y="50">94%</text>
+        <text x="40" y="104">92%</text>
+        <text x="40" y="157">90%</text>
+      </g>
+      <line x1="46" y1="180" x2="650" y2="180" stroke="var(--rule-strong)"></line>
+      <polyline points="46,46.7 121.5,60 197,60 348,113.3 635,140" fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>
+      <g fill="var(--s1)" stroke="var(--surface)" stroke-width="2">
+        <circle cx="46"    cy="46.7"  r="4.5"></circle>
+        <circle cx="121.5" cy="60"    r="4.5"></circle>
+        <circle cx="197"   cy="60"    r="4.5"></circle>
+        <circle cx="348"   cy="113.3" r="4.5"></circle>
+        <circle cx="635"   cy="140"   r="4.5"></circle>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">
+        <text x="50"  y="34">94.0</text>
+        <text x="121" y="48">93.5</text>
+        <text x="197" y="48">93.5</text>
+        <text x="348" y="101">91.5</text>
+        <text x="635" y="128">90.5</text>
+      </g>
+      <g font-size="11" fill="var(--ink-2)" text-anchor="middle">
+        <text x="46"  y="200">Base</text>
+        <text x="121" y="200">2</text>
+        <text x="197" y="200">4</text>
+        <text x="348" y="200">8</text>
+        <text x="635" y="200">15.6</text>
+      </g>
+      <g font-size="10" fill="var(--ink-3)" text-anchor="middle">
+        <text x="121" y="216">≈ refit ckpt-50 剂量</text>
+        <text x="628" y="216">UM390（15.6 ep）</text>
+      </g>
+    </svg>
+    </div>
+    <figcaption>横轴为训练 epochs。更长训练会逐渐覆盖掉 Base 的原有分布：选择 2 epochs 和 checkpoint-50 是正确方向；UM390 的 15.6 epochs 明显过量。</figcaption>
+  </figure>
+
+  <div class="verdict">
+    <span class="vlabel">我的判断</span>
+    SE-SFT 在 bucket-0 上产生了真实的 hard-capability 改善，但以轻微的 Dev 长尾覆盖收缩为代价。这个代价集中于最难的 Dev 1–3，并且单个正式对照尚未达到统计显著；它更像 SFT 的概率集中、CoT 缩短和少量遗忘，而不是整体 coding 能力下降。
+  </div>
+
+  <p>真正的修复重点不是继续寻找普通 LR/BS，而是：</p>
+  <ul>
+    <li><b>统一并语义校验</b> analysis/final 格式；</li>
+    <li><b>直接监督干净的原生 thinking</b>，而不是只训 final；</li>
+    <li>混入一定比例的 <b>Base-compatible replay</b>；</li>
+    <li><b>按题归一化</b>并选择算法 family 多样的 SE 解，而不是同一 breakthrough 的 descendants；</li>
+    <li>使用<b>真正达到相同 thinking budget</b> 的 harness；</li>
+    <li>如果做 RL，必须加入对 Base 的 <b>KL/retention 约束</b>，否则 GRPO 也可能进一步 mode collapse。</li>
+  </ul>
+  <div class="warnbox">其中统一格式仍需要先通过 human semantic gate：<b>canonical v1 的前 12 条中有 3 条实质矛盾</b>，暂时不能直接拿去训练。</div>
+</section>
+
+<!-- ================= 三 ================= -->
+<section id="s3">
+  <div class="kicker"><span class="knum">三</span>澄清</div>
+  <h2>bucket-0 改善与 Dev 1–3 丢题并不矛盾</h2>
+  <p>「bucket-0 明明更难，为什么它能改善、Dev 1–3 却丢题」这个困惑很合理，但有两个关键前提需要修正：</p>
+  <ol>
+    <li>bucket-0 <em>不等于</em>在一条单调难度轴上「严格比 1–3 更难」。</li>
+    <li>换成 Base floor=0 后，<em>bucket-0 refit 在 Dev 1–3 上其实没有退化，反而略有改善</em>。</li>
+  </ol>
+
+  <h3><span class="hn">3.1</span>单看 Dev 1–3</h3>
+  <div class="table-scroll">
+    <table>
+      <caption>Dev 1–3（共 50 题）</caption>
+      <thead><tr><th>模型</th><th>pass@1</th><th>pass@8</th><th>pass@16</th><th>Solved</th></tr></thead>
+      <tbody>
+        <tr class="base"><td><span class="dot" style="--c:var(--s1)"></span>Base floor=0</td><td class="n">15.250%</td><td class="n">61.763%</td><td class="n">78.0%</td><td class="n">39/50</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>标准 SE E1 floor=7300</td><td class="n">17.125%</td><td class="n">62.474%</td><td class="n">74.0%</td><td class="n">37/50</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s3)"></span>hp778 floor=7300</td><td class="n">16.375%</td><td class="n">58.466%</td><td class="n">72.0%</td><td class="n">36/50</td></tr>
+        <tr class="hl"><td><span class="dot" style="--c:var(--s4)"></span>bucket-0 refit50 floor=7300</td><td class="n"><b>17.500%</b></td><td class="n"><b>65.380%</b></td><td class="n"><b>80.0%</b></td><td class="n"><b>40/50</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <figure class="fig">
+    <p class="fig-title">Dev 1–3：pass@1 抬升、pass@16 分化</p>
+    <div class="legend">
+      <span><i class="dot" style="--c:var(--s1)"></i>Base floor=0</span>
+      <span><i class="dot" style="--c:var(--s2)"></i>标准 SE E1</span>
+      <span><i class="dot" style="--c:var(--s3)"></i>hp778</span>
+      <span><i class="dot" style="--c:var(--s4)"></i>bucket-0 refit50</span>
+    </div>
+    <div class="fig-scroll">
+    <div class="gchart">
+      <div class="gplot">
+        <div class="gline" style="--g:100"><span>100</span></div>
+        <div class="gline" style="--g:75"><span>75</span></div>
+        <div class="gline" style="--g:50"><span>50</span></div>
+        <div class="gline" style="--g:25"><span>25</span></div>
+        <div class="ggroups">
+          <div class="ggroup">
+            <div class="gbar" style="--v:15.25;--c:var(--s1)" tabindex="0" data-tip="Base 15.250%"><span class="v">15.3</span></div>
+            <div class="gbar" style="--v:17.125;--c:var(--s2)" tabindex="0" data-tip="标准 SE E1 17.125%"><span class="v">17.1</span></div>
+            <div class="gbar" style="--v:16.375;--c:var(--s3)" tabindex="0" data-tip="hp778 16.375%"><span class="v">16.4</span></div>
+            <div class="gbar" style="--v:17.5;--c:var(--s4)" tabindex="0" data-tip="refit50 17.500%"><span class="v">17.5</span></div>
+          </div>
+          <div class="ggroup">
+            <div class="gbar" style="--v:61.763;--c:var(--s1)" tabindex="0" data-tip="Base 61.763%"></div>
+            <div class="gbar" style="--v:62.474;--c:var(--s2)" tabindex="0" data-tip="标准 SE E1 62.474%"></div>
+            <div class="gbar" style="--v:58.466;--c:var(--s3)" tabindex="0" data-tip="hp778 58.466%"></div>
+            <div class="gbar" style="--v:65.38;--c:var(--s4)" tabindex="0" data-tip="refit50 65.380%"></div>
+          </div>
+          <div class="ggroup">
+            <div class="gbar" style="--v:78;--c:var(--s1)" tabindex="0" data-tip="Base 78.0%"><span class="v">78</span></div>
+            <div class="gbar" style="--v:74;--c:var(--s2)" tabindex="0" data-tip="标准 SE E1 74.0%"><span class="v">74</span></div>
+            <div class="gbar" style="--v:72;--c:var(--s3)" tabindex="0" data-tip="hp778 72.0%"><span class="v">72</span></div>
+            <div class="gbar" style="--v:80;--c:var(--s4)" tabindex="0" data-tip="refit50 80.0%"><span class="v">80</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="gxlabs"><span>pass@1</span><span>pass@8</span><span>pass@16</span></div>
+    </div>
+    </div>
+    <figcaption>三个 SFT 模型的 pass@1 都高于 Base；但标准 SE 与 hp778 的 pass@16 / solved 下降——成功概率集中的直接表现。refit50 则在全部指标上高于 Base。纵轴单位为 %。</figcaption>
+  </figure>
+
+  <ul>
+    <li>标准 SE 和 hp778：Dev 1–3 的 pass@1 上升，但 pass@16 / solved 下降，是<b>成功概率集中</b>。</li>
+    <li>bucket-0 refit50：Dev 1–3 的 pass@1、pass@8、pass@16 和 solved <b>全部高于 Base</b>。</li>
+    <li>refit50 总 Dev 从 189 降到 188，是因为 Dev 4–7 从 50/50 降到 48/50，抵消了 1–3 增加的 1 题。</li>
+  </ul>
+  <p>因此「bucket-0 改善，但 Dev 1–3 一定退化」并不适用于 refit50。</p>
+
+  <h3><span class="hn">3.2</span>为什么 bucket-0 不一定是同一种「更难」</h3>
+  <p>bucket 是根据 Base 在最初 16 次采样中解出多少次划分的，<em>不是根据算法复杂度划分的</em>：bucket-0 表示观测到 0/16，bucket 1–3 表示观测到 1–3/16。这是一个带有很大采样噪声的观测。比如一道真实单次成功率为 5% 的题，16 次全部失败的概率仍有：</p>
+  <div class="math">(1 − 0.05)<sup>16</sup> ≈ 44%</div>
+  <p>所以它很可能被分进 bucket-0；另一次采样又可能进入 1–3。bucket-0 同时混合了：</p>
+  <ul>
+    <li>真正极难的问题；</li>
+    <li>Base 的系统性盲点；</li>
+    <li>本来有低成功率、但恰好 16 次全失败的问题；</li>
+    <li>SE 特别擅长搜索到某类修复方案的问题。</li>
+  </ul>
+  <p>而 Dev 1–3 可能包含完全不同的算法 family。<em>代码题难度不是一个可以线性迁移的标量</em>：学会一批极难 DP 的解法，不保证保留另一批中等难度 parsing / graph / implementation 的稀有解法模式。</p>
+
+  <h3><span class="hn">3.3</span>「训练集中有 1–3 的答案」为什么还不够</h3>
+  <p>训练集确实有 745 条 bucket 1–3 数据，但<b>不是 Dev 中这 50 道原题</b>——Dev IDs 与训练集严格隔离，否则就是测试泄漏。更重要的是，训练信号的性质非常不同：</p>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>训练 slice</th><th>总行数</th><th>真正 only-SE 行数</th><th>only-SE 占比</th></tr></thead>
+      <tbody>
+        <tr><td>bucket-0</td><td class="n">794</td><td class="n">323</td><td class="n"><b>40.7%</b></td></tr>
+        <tr><td>bucket 1–3</td><td class="n">745</td><td class="n">25</td><td class="n">3.4%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul>
+    <li>bucket-0 数据中约四成代表「SE 找到了常规搜索没有找到的新能力信号」。</li>
+    <li>1–3 的 745 条答案里，真正代表 SE 新 reach 的只有约 25 条。</li>
+    <li>其余大多是 Base/independent 本来就能解的题，只是再提供一条正确答案。</li>
+  </ul>
+  <p>所以 bucket-0-only 训练非常富集 SE 特异信号；而 1–3 训练数据更多是对已知能力的答案 replay。<em>拥有正确答案，不等于它提供了新的、可迁移的推理技能</em>。此外，当前是 K1 + final-only loss：每题主要只有一条正确轨迹；thinking 不直接计算 loss；训练目标不要求保留其他解法；也不直接优化 pass@16 的算法覆盖。因此模型可以提高某些 1–3 问题的成功概率——表现为 pass@1 上升——同时消除另一些题原本只有 1/16 左右的稀有成功模式。</p>
+
+  <h3><span class="hn">3.4</span>bucket-0 的改善本身也不是全面支配 Base</h3>
+  <div class="table-scroll">
+    <table>
+      <caption>与 Base floor=0 逐题比较（Bucket-0 457）</caption>
+      <thead><tr><th>模型</th><th>新解出的 bucket-0 题</th><th>丢掉的 Base 已解题</th><th>净增加</th></tr></thead>
+      <tbody>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>标准 SE E1</td><td class="n">14</td><td class="n">8</td><td class="n">+6</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s3)"></span>hp778</td><td class="n">15</td><td class="n">6</td><td class="n">+9</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s4)"></span>bucket-0 refit50</td><td class="n">11</td><td class="n">6</td><td class="n">+5</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>因此 hp778 的 29 题不是「Base 的 20 题全部保留，再额外解出 9 题」，而是：</p>
+  <div class="math">保留 Base 的 14 题 + 新解出 15 题 − 丢掉 Base 原有的 6 题 = 29 题</div>
+  <p>这证明所谓「hard capability 改善」仍然是<em>能力分布的重新配置</em>，而不是模型在所有题上统一升级。它可以净改善 bucket-0，同时在别的边界问题上出现小幅损失，并不矛盾。</p>
+</section>
+
+<!-- ================= 四 ================= -->
+<section id="s4">
+  <div class="kicker"><span class="knum">四</span>完整数据</div>
+  <h2>更新后的完整对照表</h2>
+
+  <div class="table-scroll">
+    <table>
+      <caption>Dev 200</caption>
+      <thead><tr><th>模型 / 设置</th><th>Mean thinking</th><th>pass@1</th><th>pass@8</th><th>pass@16</th><th>Solved</th></tr></thead>
+      <tbody>
+        <tr class="base"><td><span class="dot" style="--c:var(--s1)"></span>Base floor=0</td><td class="n">4,987</td><td class="n">49.844%</td><td class="n">88.541%</td><td class="n"><b>94.5%</b></td><td class="n"><b>189/200</b></td></tr>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>标准 SE E1 floor=7300</td><td class="n">4,806</td><td class="n">49.000%</td><td class="n">88.602%</td><td class="n">93.0%</td><td class="n">186/200</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s3)"></span>超参数最佳 SE hp778 floor=7300</td><td class="n">4,814</td><td class="n">50.031%</td><td class="n">87.501%</td><td class="n">92.5%</td><td class="n">185/200</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s4)"></span>bucket-0 refit checkpoint-50 floor=7300</td><td class="n">5,002</td><td class="n"><b>50.438%</b></td><td class="n"><b>89.025%</b></td><td class="n">94.0%</td><td class="n">188/200</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <caption>Bucket-0 457</caption>
+      <thead><tr><th>模型 / 设置</th><th>Mean thinking</th><th>pass@1</th><th>pass@8</th><th>pass@16</th><th>Solved</th></tr></thead>
+      <tbody>
+        <tr class="base"><td><span class="dot" style="--c:var(--s1)"></span>Base floor=0</td><td class="n">6,887</td><td class="n">0.520%</td><td class="n">2.751%</td><td class="n">4.376%</td><td class="n">20/457</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s6)"></span>BoN K1 native-final E2 floor=0</td><td class="n">5,939</td><td class="n">0.424%</td><td class="n">2.743%</td><td class="n">4.376%</td><td class="n">20/457</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s6)"></span>BoN K1 native-final E2 floor=7300</td><td class="n">6,741</td><td class="n">0.438%</td><td class="n">2.111%</td><td class="n">3.063%</td><td class="n">14/457</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>标准 SE E1 floor=7300</td><td class="n">6,210</td><td class="n">0.615%</td><td class="n">3.471%</td><td class="n">5.689%</td><td class="n">26/457</td></tr>
+        <tr class="hl"><td><span class="dot" style="--c:var(--s3)"></span>超参数最佳 SE hp778 floor=7300</td><td class="n">6,416</td><td class="n"><b>0.848%</b></td><td class="n"><b>4.018%</b></td><td class="n"><b>6.346%</b></td><td class="n"><b>29/457</b></td></tr>
+        <tr><td><span class="dot" style="--c:var(--s5)"></span>bucket-0 UM390 floor=7300</td><td class="n">5,200</td><td class="n">0.725%</td><td class="n">2.902%</td><td class="n">3.939%</td><td class="n">18/457</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s4)"></span>bucket-0 refit checkpoint-50 floor=7300</td><td class="n">6,442</td><td class="n">0.766%</td><td class="n">3.699%</td><td class="n">5.470%</td><td class="n">25/457</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <figure class="fig">
+    <p class="fig-title">Bucket-0 457：pass@16 对比</p>
+    <p class="fig-sub">横轴满刻度 7%；右列为 Solved 题数</p>
+    <div class="fig-scroll">
+    <div class="hchart">
+      <div class="hrow"><span class="hname"><i class="dot" style="--c:var(--s3)"></i>hp778 floor=7300</span><div class="htrack"><div class="hfill" style="--v:6.346;--c:var(--s3)"><i>6.346%</i></div></div><span class="hval">29/457</span></div>
+      <div class="hrow"><span class="hname"><i class="dot" style="--c:var(--s2)"></i>标准 SE E1 floor=7300</span><div class="htrack"><div class="hfill" style="--v:5.689;--c:var(--s2)"><i>5.689%</i></div></div><span class="hval">26/457</span></div>
+      <div class="hrow"><span class="hname"><i class="dot" style="--c:var(--s4)"></i>refit50 floor=7300</span><div class="htrack"><div class="hfill" style="--v:5.47;--c:var(--s4)"><i>5.470%</i></div></div><span class="hval">25/457</span></div>
+      <div class="hrow"><span class="hname"><i class="dot" style="--c:var(--s1)"></i>Base floor=0</span><div class="htrack"><div class="hfill" style="--v:4.376;--c:var(--s1)"><i>4.376%</i></div></div><span class="hval">20/457</span></div>
+      <div class="hrow"><span class="hname"><i class="dot" style="--c:var(--s6)"></i>BoN K1 E2 floor=0</span><div class="htrack"><div class="hfill" style="--v:4.376;--c:var(--s6)"><i>4.376%</i></div></div><span class="hval">20/457</span></div>
+      <div class="hrow"><span class="hname"><i class="dot" style="--c:var(--s5)"></i>UM390 floor=7300</span><div class="htrack"><div class="hfill" style="--v:3.939;--c:var(--s5)"><i>3.939%</i></div></div><span class="hval">18/457</span></div>
+      <div class="hrow"><span class="hname"><i class="dot" style="--c:var(--s6)"></i>BoN K1 E2 floor=7300</span><div class="htrack"><div class="hfill" style="--v:3.063;--c:var(--s6)"><i>3.063%</i></div></div><span class="hval">14/457</span></div>
+    </div>
+    </div>
+    <figcaption>SE 系列（hp778、标准 SE、refit50）全部高于 Base；BoN 不带来 bucket-0 提升；训练过量的 UM390 反而低于 Base。</figcaption>
+  </figure>
+
+  <p class="tnote">用 Base floor=0 后，实际 thinking compute 也更接近：Dev 是 4,987 对 4,806–5,002；bucket-0 是 6,887 对 6,210–6,442。UM390 因为只有 5,200 tokens，仍然是其中最不匹配、且训练过量的对照。</p>
+</section>
+
+<!-- ================= 五 ================= -->
+<section id="s5">
+  <div class="kicker"><span class="knum">五</span>修复方案</div>
+  <h2>family-balanced · insight-first · per-problem-normalized 的多解蒸馏</h2>
+  <p>最可行的办法不是把 SE 的 K4 全部塞进 SFT。目标不是让模型记住更多代码，而是先学习</p>
+  <div class="math">p(algorithm family | problem)</div>
+  <p>然后再学习</p>
+  <div class="math">p(reasoning, code | problem, algorithm family)</div>
+
+  <h3><span class="hn">5.1</span>为什么现有 K4 没把多样性蒸馏进去</h3>
+  <ul>
+    <li>多个答案经常是<b>同一次 breakthrough 的 descendants</b>：AST 不同但算法相同。</li>
+    <li>某题有 4 条就获得 <b>4 倍梯度权重</b>，改变了题目剂量。</li>
+    <li>SE loop-0、loop≥1、BoN 的 analysis/final <b>格式不统一</b>。</li>
+    <li>native-final 只训练 final，<b>真正不同的 thinking 没有直接 loss</b>。</li>
+  </ul>
+  <p>因此模型看到的常常不是「四种算法」，而是「同一种算法的四种代码写法」。</p>
+
+  <h3><span class="hn">5.2</span>建议的数据流水线</h3>
+  <figure class="fig">
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 592" role="img" aria-label="数据流水线：SE 正确候选经完整测试验证、按算法 family 聚类、每 family 选一个代表、统一为 insight 格式、每题权重固定为 1，最后进入多参考 SFT" style="min-width:520px">
+      <defs>
+        <marker id="arrA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-3)"></path>
+        </marker>
+      </defs>
+      <g fill="var(--surface-2)" stroke="var(--rule-strong)">
+        <rect x="70" y="8"   width="310" height="54" rx="10"></rect>
+        <rect x="70" y="92"  width="310" height="54" rx="10"></rect>
+        <rect x="70" y="176" width="310" height="54" rx="10"></rect>
+        <rect x="70" y="260" width="310" height="54" rx="10"></rect>
+        <rect x="70" y="344" width="310" height="54" rx="10"></rect>
+        <rect x="70" y="512" width="310" height="54" rx="10"></rect>
+      </g>
+      <rect x="70" y="428" width="310" height="54" rx="10" fill="var(--accent-wash)" stroke="var(--accent)"></rect>
+      <g stroke="var(--ink-3)" stroke-width="1.3" marker-end="url(#arrA)">
+        <line x1="225" y1="62"  x2="225" y2="86"></line>
+        <line x1="225" y1="146" x2="225" y2="170"></line>
+        <line x1="225" y1="230" x2="225" y2="254"></line>
+        <line x1="225" y1="314" x2="225" y2="338"></line>
+        <line x1="225" y1="398" x2="225" y2="422"></line>
+        <line x1="225" y1="482" x2="225" y2="506"></line>
+      </g>
+      <g font-size="13" fill="var(--ink)" text-anchor="middle">
+        <text x="225" y="41">全部 SE 正确候选</text>
+        <text x="225" y="125">完整测试验证</text>
+        <text x="225" y="209">按算法 family 聚类</text>
+        <text x="225" y="286">每个 family 只选一个最佳代表</text>
+        <text x="225" y="377">统一为 insight → reasoning → final</text>
+        <text x="225" y="454">每题总 loss 权重固定为 1</text>
+        <text x="225" y="545">多参考 SFT</text>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--ink-2)" text-anchor="middle">
+        <text x="225" y="304">K_i = min(4, 真实 family 数)</text>
+        <text x="225" y="472">w_ij = 1 / F_i</text>
+      </g>
+      <g font-size="11" fill="var(--ink-3)">
+        <text x="398" y="197">规范化 AST/CFG · 数据结构与复杂度</text>
+        <text x="398" y="213">LLM descriptor · lineage · 语义分类器</text>
+        <text x="398" y="282">不为凑 K4 填入同一</text>
+        <text x="398" y="298">breakthrough 的 descendants</text>
+        <text x="398" y="459" fill="var(--accent-deep)" font-weight="600">★ 最重要的控制变量</text>
+      </g>
+    </svg>
+    </div>
+    <figcaption>正确性必须优先于多样性：只有完整测试通过的候选才能进入 family clustering。</figcaption>
+  </figure>
+
+  <p><b>① 先识别真正的 algorithm family。</b>不能只用文本去重或者 AST2。每个候选至少提取：核心 observation、算法类别、状态定义、关键不变量、数据结构、时间和空间复杂度、与其他候选的实质差异、SE lineage / breakthrough loop / parent。聚类时结合规范化 AST/CFG、数据结构和复杂度、LLM 提取的 algorithm descriptor、lineage 信息、pairwise semantic-family classifier。</p>
+  <p><b>② 每个 family 只保留一个代表。</b>对每道题取 <code>K_i = min(4, 真实 algorithm families 数)</code>，不要为了凑 K4 填入重复 descendants。例如一题可能保留：排序 + greedy、prefix/suffix、binary search、dynamic programming。如果一题只有一种真实算法，就只保留 K1。训练行数可以不同，但题目总权重不能不同。</p>
+  <p><b>③ 每题总梯度权重固定。</b>如果一道题有 F<sub>i</sub> 个 family，则每条 family 样本权重为：</p>
+  <div class="math">w<sub>ij</sub> = 1 / F<sub>i</sub>　　（K1 题：每条权重 1；K2 题：1/2；K4 题：1/4）</div>
+  <p>或者每个 epoch 每题随机采一个 family，下一 epoch 换另一个。这样可以学习多解，而不会让多解题获得 4 倍训练剂量。<em>这是现有 naive K4 最重要的控制变量</em>。</p>
+
+  <h3><span class="hn">5.3</span>用 insight 作为「多模态入口」</h3>
+  <p>统一后的 analysis 不应该只是很短的答案摘要，而应<em>让不同算法从一开始就分叉</em>：</p>
+  <div class="spec">
+    <div class="spec-row"><div class="spec-key">INSIGHT</div><div class="spec-val">最关键、非显然的观察是什么？为什么这个观察把原问题转化为可解形式？</div></div>
+    <div class="spec-row"><div class="spec-key">APPROACH</div><div class="spec-val">使用什么算法和数据结构？状态/变量的含义是什么？按什么顺序计算？</div></div>
+    <div class="spec-row"><div class="spec-key">CORRECTNESS</div><div class="spec-val">核心不变量是什么？为什么不会漏解或重复？</div></div>
+    <div class="spec-row"><div class="spec-key">COMPLEXITY</div><div class="spec-val">时间复杂度、空间复杂度。</div></div>
+    <div class="spec-row"><div class="spec-key">IMPLEMENTATION CHECKS</div><div class="spec-val">边界条件、容易出错的细节。</div></div>
+    <div class="spec-row"><div class="spec-key">FINAL</div><div class="spec-val">固定为一致格式的<b>完整 Python 解答</b>。</div></div>
+  </div>
+  <p>这样一题的四种 family 会在最早的 Insight token 上分叉，模型比较容易保留多模态分布。否则四份相似长代码做普通 MLE，很容易被平均成一个主模式。</p>
+
+  <div class="warnbox"><b>注意 canonical 数据的风险：</b>不能直接使用当前 canonical v1——人工 gate 的前 12 条中有 3 条实质矛盾。更安全的生成流程是：① 先让 teacher 只看问题，提出若干可能 insight；② 将 insight 与 verified SE code family 对齐；③ critic 检查 insight、算法、复杂度和代码是否一致；④ repair；⑤ 再跑代码测试和人工语义抽检。不要直接让 teacher 看着答案编一段很长的「伪原生 CoT」——此前 regen/full 已证明这种 answer-conditioned explanation 容易短化推理并造成能力遗忘。</div>
+
+  <h3><span class="hn">5.4</span>训练目标分三阶段调整</h3>
+  <p><b>第一阶段：低风险、立即可做。</b>先保持当前 native-final + final-only，只改变解法选择：</p>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Arm</th><th>数据</th><th>每题权重</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td class="n">A</td><td style="text-align:left">当前 SE K1</td><td class="n">1</td><td style="text-align:left">基线</td></tr>
+        <tr><td class="n">B</td><td style="text-align:left">naive SE K4</td><td class="n">4</td><td style="text-align:left">已知问题对照</td></tr>
+        <tr class="hl"><td class="n">C</td><td style="text-align:left">family-balanced SE K≤4</td><td class="n">1</td><td style="text-align:left">单独测试真实多样性选择</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="tnote">如果 C 明显优于 A/B，说明过去 K4 失败主要是重复 descendants 和剂量失控，不必先引入格式变量。</p>
+
+  <p><b>第二阶段：蒸馏 reasoning diversity。</b>语义 gate 通过后增加：</p>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Arm</th><th>数据</th><th>Loss</th></tr></thead>
+      <tbody>
+        <tr><td class="n">C</td><td style="text-align:left">family-balanced native</td><td style="text-align:left">final-only</td></tr>
+        <tr><td class="n">D</td><td style="text-align:left">family-balanced canonical insight</td><td style="text-align:left">analysis + final</td></tr>
+        <tr><td class="n">E</td><td style="text-align:left">D + Base/BoN replay</td><td style="text-align:left">analysis + final</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="tnote">这样能把「family selection」和「reasoning supervision」分开诊断。</p>
+
+  <p><b>第三阶段：两段式生成。</b>推理时不要立即生成完整代码：</p>
+  <figure class="fig">
+    <div class="fig-scroll">
+    <svg viewBox="0 0 760 312" role="img" aria-label="两段式生成：一个问题先采样 4 个 insight，语义去重合并为 3 个 family，每个 family 分别生成代码，再由测试或 verifier 选择" style="min-width:620px">
+      <defs>
+        <marker id="arrB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-3)"></path>
+        </marker>
+      </defs>
+      <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--ink-3)" text-anchor="middle">
+        <text x="62" y="16">问题</text>
+        <text x="236" y="16">采样 4 个 insight</text>
+        <text x="407" y="16">语义去重</text>
+        <text x="579" y="16">family → 代码</text>
+        <text x="706" y="16">选择</text>
+      </g>
+      <g stroke="var(--ink-3)" stroke-width="1.3" marker-end="url(#arrB)" fill="none">
+        <line x1="108" y1="160" x2="164" y2="54"></line>
+        <line x1="108" y1="160" x2="164" y2="128"></line>
+        <line x1="108" y1="160" x2="164" y2="202"></line>
+        <line x1="108" y1="160" x2="164" y2="276"></line>
+        <line x1="302" y1="54"  x2="340" y2="78"></line>
+        <line x1="302" y1="128" x2="340" y2="94"></line>
+        <line x1="302" y1="202" x2="340" y2="164"></line>
+        <line x1="302" y1="276" x2="340" y2="236"></line>
+        <line x1="468" y1="86"  x2="514" y2="86"></line>
+        <line x1="468" y1="160" x2="514" y2="160"></line>
+        <line x1="468" y1="234" x2="514" y2="234"></line>
+        <line x1="638" y1="86"  x2="660" y2="146"></line>
+        <line x1="638" y1="160" x2="660" y2="160"></line>
+        <line x1="638" y1="234" x2="660" y2="174"></line>
+      </g>
+      <g fill="var(--surface-2)" stroke="var(--rule-strong)">
+        <rect x="16"  y="136" width="92"  height="48" rx="9"></rect>
+        <rect x="170" y="34"  width="132" height="40" rx="9"></rect>
+        <rect x="170" y="108" width="132" height="40" rx="9"></rect>
+        <rect x="170" y="182" width="132" height="40" rx="9"></rect>
+        <rect x="170" y="256" width="132" height="40" rx="9"></rect>
+        <rect x="346" y="66"  width="122" height="40" rx="9"></rect>
+        <rect x="346" y="140" width="122" height="40" rx="9"></rect>
+        <rect x="346" y="214" width="122" height="40" rx="9"></rect>
+        <rect x="520" y="66"  width="118" height="40" rx="9"></rect>
+        <rect x="520" y="140" width="118" height="40" rx="9"></rect>
+        <rect x="520" y="214" width="118" height="40" rx="9"></rect>
+      </g>
+      <rect x="662" y="124" width="82" height="72" rx="9" fill="var(--accent-wash)" stroke="var(--accent)"></rect>
+      <g font-size="12" fill="var(--ink)" text-anchor="middle">
+        <text x="62" y="164">问题</text>
+        <text x="236" y="58">① DP</text>
+        <text x="236" y="132">② DP（等价）</text>
+        <text x="236" y="206">③ greedy</text>
+        <text x="236" y="280">④ 二分</text>
+        <text x="407" y="90">DP</text>
+        <text x="407" y="164">greedy</text>
+        <text x="407" y="238">二分</text>
+      </g>
+      <g font-size="11" fill="var(--ink-2)" text-anchor="middle">
+        <text x="579" y="90">reasoning + 代码</text>
+        <text x="579" y="164">reasoning + 代码</text>
+        <text x="579" y="238">reasoning + 代码</text>
+      </g>
+      <g font-size="11" fill="var(--ink)" text-anchor="middle">
+        <text x="703" y="152">测试 /</text>
+        <text x="703" y="167">verifier</text>
+        <text x="703" y="182">选择</text>
+      </g>
+    </svg>
+    </div>
+    <figcaption>先采样 4 个 insight/approach，语义去重（①② 同属 DP family 被合并），每个 insight 分别生成代码，再用测试或 verifier 选择。这比对同一个 prompt 直接采样 16 份完整答案更容易产生算法级多样性。</figcaption>
+  </figure>
+
+  <h3><span class="hn">5.5</span>数据混合建议</h3>
+  <p>不建议所有 bucket 都只用 SE：</p>
+  <div class="mix">
+    <div><b>BUCKET-0</b>优先 SE，尤其 strict only-SE 和真正不同的 breakthrough family。</div>
+    <div><b>BUCKET 1–3</b>SE 与 BoN/independent 合并后按 family 选择。</div>
+    <div><b>BUCKET 4–15</b>优先 Base-compatible BoN/loop-0 replay：这些 bucket 中 independent 的真实算法 family 反而更多。</div>
+    <div><b>全程</b>保留 20%–30% 的 Base-compatible replay，防止 Dev coverage 收缩。</div>
+  </div>
+  <p>可以概括为：<b>bucket-0 = SE discovery；1–3 = SE + BoN family union；4–15 = BoN/loop-0 retention replay</b>。</p>
+
+  <h3><span class="hn">5.6</span>如果以后使用 GRPO</h3>
+  <p>GRPO 不能只奖励 correctness，否则也会收缩到单一高奖励模式。至少需要：</p>
+  <div class="math">R = R<sub>correct</sub> + λ·R<sub>family novelty</sub> − β·KL(π ‖ π<sub>base</sub>) − γ·R<sub>duplicate</sub></div>
+  <p>每组生成 8–16 个候选：完整测试通过获得 correctness reward；与组内其他正确答案属于新 family，获得 novelty reward；同 family 重复不给额外奖励；用 KL 保留 Base 的 Dev 分布；对长度和格式加约束。</p>
+  <p>但我会<em>先做 family-balanced SFT</em>：它更便宜，也能直接判断 SE 的多样性究竟有没有训练价值。如果这一步都没有收益，直接做 GRPO 很可能只是更昂贵的 mode collapse。</p>
+
+  <div class="verdict">
+    <span class="vlabel">最关键的实验</span>
+    不是「K1 vs K4」，而是：<b>K1 vs naive K4 vs genuine-family-balanced K≤4</b>——在相同题目权重、相同 token/update 剂量和相同格式下比较。这才能真正回答 SE 的丰富解法能否被蒸馏。
+  </div>
+</section>
+
+<footer>
+  数据与结论基于 2026-08 的内部评估：Dev 200 与 Bucket-0 457，每模型每题 16 次采样（Dev 共 3,200 samples）；逐题对照使用同协议 Base floor=7300，总量对照使用 Base floor=0。逐题差异均未达统计显著（McNemar p ≥ 0.125）。
+</footer>
+
+</div>

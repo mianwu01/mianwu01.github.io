@@ -1,0 +1,1154 @@
+<title>SE-SFT Distribution Sharpening</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700;8..60,900&family=Source+Sans+3:wght@400;500;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --surface: #fcfdfe;
+    --surface-2: #eef1f5;
+    --ink: #171a20;
+    --ink-2: #555b66;
+    --ink-3: #878d99;
+    --rule: #e2e5eb;
+    --rule-strong: #c6ccd6;
+    --accent: #2a78d6;
+    --accent-deep: #1c5cab;
+    --accent-wash: rgba(42, 120, 214, 0.08);
+    --warn-edge: #b97f10;
+    --warn-wash: rgba(237, 161, 0, 0.09);
+    --s1: #2a78d6;
+    --s2: #eb6834;
+    --s3: #1baf7a;
+    --s4: #eda100;
+    --s5: #e87ba4;
+    --s6: #008300;
+    --grid: #e4e7ec;
+    --shadow: 0 1px 2px rgba(23, 26, 32, 0.05), 0 6px 20px rgba(23, 26, 32, 0.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #101319;
+      --surface: #1a1e26;
+      --surface-2: #212630;
+      --ink: #e9ebf0;
+      --ink-2: #a7aeba;
+      --ink-3: #7b8290;
+      --rule: #2a303b;
+      --rule-strong: #3c4350;
+      --accent: #3987e5;
+      --accent-deep: #74abec;
+      --accent-wash: rgba(57, 135, 229, 0.13);
+      --warn-edge: #d9ab3c;
+      --warn-wash: rgba(201, 133, 0, 0.14);
+      --s1: #3987e5;
+      --s2: #d95926;
+      --s3: #199e70;
+      --s4: #c98500;
+      --s5: #d55181;
+      --s6: #008300;
+      --grid: #272d38;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #101319;
+    --surface: #1a1e26;
+    --surface-2: #212630;
+    --ink: #e9ebf0;
+    --ink-2: #a7aeba;
+    --ink-3: #7b8290;
+    --rule: #2a303b;
+    --rule-strong: #3c4350;
+    --accent: #3987e5;
+    --accent-deep: #74abec;
+    --accent-wash: rgba(57, 135, 229, 0.13);
+    --warn-edge: #d9ab3c;
+    --warn-wash: rgba(201, 133, 0, 0.14);
+    --s1: #3987e5;
+    --s2: #d95926;
+    --s3: #199e70;
+    --s4: #c98500;
+    --s5: #d55181;
+    --s6: #008300;
+    --grid: #272d38;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 15.5px;
+    line-height: 1.72;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition: none !important; }
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 24px 96px; }
+  p, ul, ol { max-width: 700px; }
+  ul, ol { padding-left: 1.4em; }
+  li { margin: 4px 0; }
+  a { color: var(--accent-deep); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+  strong { font-weight: 700; }
+  em { font-style: normal; font-weight: 700; color: var(--accent-deep); }
+  code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.86em;
+    background: var(--surface-2);
+    padding: 1px 6px;
+    border-radius: 5px;
+  }
+  section { scroll-margin-top: 24px; }
+
+  /* ---------- header ---------- */
+  header.masthead { padding-top: 64px; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    color: var(--accent-deep);
+    text-transform: uppercase;
+  }
+  h1 {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-weight: 900;
+    font-size: clamp(32px, 5.6vw, 46px);
+    line-height: 1.18;
+    margin: 10px 0 14px;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .lede { font-size: 17.5px; color: var(--ink-2); max-width: 660px; margin: 0 0 30px; }
+  .lede b { color: var(--ink); }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 26px 0 30px;
+  }
+  .tile {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 14px 16px 12px;
+    box-shadow: var(--shadow);
+  }
+  .tile .t-label { font-size: 12px; color: var(--ink-3); line-height: 1.5; }
+  .tile .t-value { font-size: 24px; font-weight: 700; line-height: 1.4; margin: 2px 0; }
+  .tile .t-value small { font-size: 14px; font-weight: 500; color: var(--ink-3); }
+  .tile .t-sub { font-size: 12px; color: var(--ink-2); line-height: 1.5; }
+
+  nav.toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+    padding: 14px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    font-size: 13px;
+  }
+  nav.toc a { color: var(--ink-2); }
+  nav.toc a b {
+    font-family: "Source Serif 4", serif;
+    color: var(--accent-deep);
+    margin-right: 6px;
+    font-weight: 700;
+  }
+
+  /* ---------- sections ---------- */
+  section { margin-top: 76px; }
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--ink-3);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .knum {
+    font-family: "Source Serif 4", serif;
+    font-weight: 700;
+    font-size: 13.5px;
+    color: var(--accent-deep);
+    background: var(--accent-wash);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0;
+  }
+  h2 {
+    font-family: "Source Serif 4", serif;
+    font-weight: 700;
+    font-size: 27px;
+    line-height: 1.3;
+    margin: 10px 0 16px;
+    text-wrap: balance;
+  }
+  h3 {
+    font-family: "Source Serif 4", serif;
+    font-weight: 700;
+    font-size: 19px;
+    margin: 40px 0 10px;
+  }
+  h3 .hn {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-3);
+    margin-right: 8px;
+    vertical-align: 2px;
+  }
+
+  /* ---------- tables ---------- */
+  .table-scroll {
+    overflow-x: auto;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin: 18px 0 6px;
+  }
+  table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 13.5px; }
+  caption {
+    text-align: left;
+    font-size: 12.5px;
+    color: var(--ink-3);
+    padding: 12px 16px 0;
+  }
+  th {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    color: var(--ink-3);
+    text-align: right;
+    padding: 12px 14px 8px;
+    border-bottom: 1px solid var(--rule-strong);
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+  th:first-child, td:first-child { text-align: left; }
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--rule);
+    text-align: right;
+    white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: none; }
+  td.n { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  tr.hl td { background: var(--accent-wash); }
+  tr.base td { color: var(--ink-2); }
+  tr.base td:first-child { color: var(--ink); }
+  td b, th b { font-weight: 700; color: var(--ink); }
+  .tnote { font-size: 12.5px; color: var(--ink-3); margin: 8px 2px 0; max-width: 760px; }
+  .dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--c);
+    margin-right: 8px;
+  }
+
+  /* ---------- figures ---------- */
+  figure.fig {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 20px 22px 16px;
+    box-shadow: var(--shadow);
+    margin: 22px 0;
+  }
+  .fig-title { font-size: 14px; font-weight: 700; margin: 0 0 2px; }
+  .fig-sub { font-size: 12px; color: var(--ink-3); margin: 0 0 10px; }
+  figcaption { font-size: 12.5px; color: var(--ink-3); margin-top: 12px; line-height: 1.6; max-width: 760px; }
+  .fig svg { max-width: 100%; height: auto; display: block; }
+  .fig-scroll { overflow-x: auto; }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    font-size: 12px;
+    color: var(--ink-2);
+    margin: 6px 0 16px;
+  }
+  .legend span { display: inline-flex; align-items: center; }
+  .legend .dot { width: 8px; height: 8px; }
+
+  /* grouped vertical bars */
+  .gchart { --u: 2px; min-width: 540px; }
+  .gplot { position: relative; height: 200px; margin: 30px 6px 0 44px; }
+  .gline { position: absolute; left: 0; right: 0; bottom: calc(var(--g) * var(--u)); border-top: 1px solid var(--grid); }
+  .gline span {
+    position: absolute;
+    left: -40px;
+    top: -9px;
+    width: 34px;
+    text-align: right;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    color: var(--ink-3);
+  }
+  .gplot::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; border-top: 1px solid var(--rule-strong); }
+  .ggroups { position: absolute; inset: 0; display: flex; justify-content: space-around; align-items: flex-end; }
+  .ggroup { display: flex; gap: 10px; align-items: flex-end; }
+  .gbar {
+    width: 22px;
+    height: calc(var(--v) * var(--u));
+    background: var(--c);
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    z-index: 1;
+  }
+  .gbar .v {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+  .gbar:hover::after, .gbar:focus-visible::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 22px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--bg);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    padding: 3px 9px;
+    border-radius: 6px;
+    white-space: nowrap;
+    z-index: 5;
+  }
+  .gxlabs { display: flex; justify-content: space-around; margin: 8px 6px 0 44px; }
+  .gxlabs span { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--ink-2); }
+
+  /* horizontal bars */
+  .hchart { min-width: 540px; }
+  .hrow { display: grid; grid-template-columns: 210px 1fr 76px; align-items: center; gap: 12px; margin: 8px 0; }
+  .hname { font-size: 12.5px; color: var(--ink-2); display: flex; align-items: center; white-space: nowrap; }
+  .htrack { position: relative; height: 18px; }
+  .hfill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: calc(var(--v) / 7 * 100%);
+    background: var(--c);
+    border-radius: 0 4px 4px 0;
+  }
+  .hfill i {
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    font-style: normal;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+  .hval { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--ink-2); text-align: right; }
+
+  /* diverging bars */
+  .dgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .dpanel h4 { font-size: 12.5px; margin: 0 0 2px; }
+  .dpanel .dsub { font-size: 11px; color: var(--ink-3); margin: 0 0 12px; font-family: "IBM Plex Mono", monospace; }
+  .drow { display: grid; grid-template-columns: 106px 1fr 46px; align-items: center; gap: 10px; margin: 9px 0; }
+  .drow .dn { font-size: 12px; color: var(--ink-2); white-space: nowrap; }
+  .dtrack { display: grid; grid-template-columns: 1fr 1fr; height: 16px; position: relative; }
+  .dtrack::after { content: ""; position: absolute; left: 50%; top: -5px; bottom: -5px; width: 1px; background: var(--rule-strong); }
+  .dneg, .dpos { position: relative; }
+  .dneg b { position: absolute; right: 0; top: 0; bottom: 0; width: var(--w); background: var(--c); border-radius: 4px 0 0 4px; }
+  .dpos b { position: absolute; left: 0; top: 0; bottom: 0; width: var(--w); background: var(--c); border-radius: 0 4px 4px 0; }
+  .dval { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-align: right; font-variant-numeric: tabular-nums; }
+  .dval.neg { color: var(--ink); }
+
+  /* token strip */
+  .tokwrap { margin: 16px 0; max-width: 760px; }
+  .tokrow { display: flex; align-items: stretch; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+  .tokrow .tag {
+    flex: 0 0 46px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    color: var(--ink-3);
+    display: flex;
+    align-items: center;
+  }
+  .tok { padding: 9px 14px; border-radius: 9px; font-size: 12.5px; line-height: 1.55; border: 1px solid var(--rule); background: var(--surface); }
+  .tok small { display: block; font-size: 11px; color: var(--ink-3); }
+  .tok.masked { border-style: dashed; border-color: var(--rule-strong); color: var(--ink-3); background: transparent; }
+  .tok.loss { border-color: var(--accent); background: var(--accent-wash); }
+  .tok.plain { background: var(--surface-2); }
+
+  /* callouts */
+  .note, .warnbox {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-wash);
+    padding: 14px 20px;
+    border-radius: 0 10px 10px 0;
+    margin: 20px 0;
+    max-width: 700px;
+    font-size: 14px;
+  }
+  .warnbox { border-left-color: var(--warn-edge); background: var(--warn-wash); }
+  .verdict {
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--accent);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    border-radius: 0 12px 12px 0;
+    padding: 24px 30px;
+    margin: 28px 0;
+    max-width: 760px;
+    font-family: "Source Serif 4", serif;
+    font-size: 17px;
+    line-height: 1.75;
+  }
+  .verdict .vlabel {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--accent-deep);
+    display: block;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .math {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
+    padding: 13px 18px;
+    border-radius: 10px;
+    overflow-x: auto;
+    max-width: 700px;
+    margin: 14px 0;
+    white-space: nowrap;
+  }
+  .math sub, .math sup { font-size: 10px; }
+
+  /* spec card */
+  .spec { border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow); margin: 18px 0; max-width: 760px; }
+  .spec-row { display: grid; grid-template-columns: 225px 1fr; }
+  .spec-row + .spec-row { border-top: 1px solid var(--rule); }
+  .spec-key {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--accent-deep);
+    padding: 13px 18px;
+    background: var(--surface-2);
+    display: flex;
+    align-items: flex-start;
+  }
+  .spec-val { padding: 13px 18px; font-size: 13.5px; line-height: 1.6; color: var(--ink-2); }
+  .spec-val b { color: var(--ink); }
+
+  /* mixture strip */
+  .mix { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 18px 0; }
+  .mix > div { border: 1px solid var(--rule); background: var(--surface); border-radius: 11px; padding: 13px 15px; font-size: 12.5px; line-height: 1.55; color: var(--ink-2); box-shadow: var(--shadow); }
+  .mix b { display: block; font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.05em; color: var(--accent-deep); margin-bottom: 5px; }
+
+  footer {
+    margin-top: 90px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    font-size: 12.5px;
+    color: var(--ink-3);
+    line-height: 1.7;
+  }
+
+  @media (max-width: 720px) {
+    .tiles { grid-template-columns: 1fr 1fr; }
+    .dgrid { grid-template-columns: 1fr; }
+    .spec-row { grid-template-columns: 1fr; }
+    .spec-key { padding-bottom: 0; background: transparent; }
+    .spec-val { padding-top: 4px; }
+    .mix { grid-template-columns: 1fr 1fr; }
+    .hrow { grid-template-columns: 150px 1fr 66px; }
+    .verdict { padding: 18px 20px; font-size: 16px; }
+  }
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <div class="eyebrow">SE-SFT evaluation analysis · Dev 200 × Bucket-0 457</div>
+  <h1>SE-SFT Distribution Sharpening</h1>
+  <p class="lede">The current SE-SFT recipe delivers a <b>real hard-capability gain on bucket-0</b>, at the cost of a <b>slight contraction of Dev long-tail coverage</b> — probability concentration, CoT shortening, and mild forgetting stacked together, not a broad loss of coding ability.</p>
+
+  <div class="tiles">
+    <div class="tile">
+      <div class="t-label">Dev 200 · Solved</div>
+      <div class="t-value">189 <small>→ 185–188</small></div>
+      <div class="t-sub">Base → three SE-SFT models; slight long-tail contraction</div>
+    </div>
+    <div class="tile">
+      <div class="t-label">Bucket-0 457 · Solved</div>
+      <div class="t-value">20 <small>→ 29</small></div>
+      <div class="t-sub">Base → hp778; a real hard-capability gain</div>
+    </div>
+    <div class="tile">
+      <div class="t-label">McNemar p</div>
+      <div class="t-value">≥ 0.125</div>
+      <div class="t-sub">No Dev regression reaches statistical significance</div>
+    </div>
+    <div class="tile">
+      <div class="t-label">Where losses land</div>
+      <div class="t-value">5/6 · 5/6 · 5/7</div>
+      <div class="t-sub">Nearly all lost problems come from the hardest Dev 1–3</div>
+    </div>
+  </div>
+
+  <nav class="toc">
+    <a href="#s1"><b>I</b>Symptom: local, not significant</a>
+    <a href="#s2"><b>II</b>Causes: five structural flaws</a>
+    <a href="#s3"><b>III</b>Clarification: bucket-0 vs Dev 1–3</a>
+    <a href="#s4"><b>IV</b>Full results</a>
+    <a href="#s5"><b>V</b>Fix: family-balanced distillation</a>
+  </nav>
+</header>
+
+<!-- ================= I ================= -->
+<section id="s1">
+  <div class="kicker"><span class="knum">I</span>Symptom</div>
+  <h2>The regression is real, but local — and not statistically significant</h2>
+  <p>The root cause is not that "SE broadly damages Dev ability." Rather, the current SE-SFT recipe <em>slightly contracts the model's long-tail coverage</em>: correct-answer probability concentrates onto a subset of problems, so pass@1 can hold or even rise, while borderline problems that used to be solved with small probability drop to 0/16 — pulling pass@16 and solved down.</p>
+
+  <h3><span class="hn">1.1</span>Per-problem comparison: the regression is local</h3>
+  <div class="table-scroll">
+    <table>
+      <caption>Against the same-protocol Base floor=7300 (Dev 200)</caption>
+      <thead><tr><th>Model</th><th>Newly solved</th><th>Lost vs Base</th><th>Net solved</th><th>McNemar p</th></tr></thead>
+      <tbody>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>Standard SE E1</td><td class="n">2</td><td class="n">6</td><td class="n">−4</td><td class="n">0.289</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s3)"></span>hp778</td><td class="n">1</td><td class="n">6</td><td class="n">−5</td><td class="n">0.125</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s4)"></span>bucket-0 refit50</td><td class="n">5</td><td class="n">7</td><td class="n">−2</td><td class="n">0.774</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="tnote">None of these differences is statistically significant — we cannot conclude that "all SE necessarily degrades Dev."</p>
+  <ul>
+    <li>Of Standard SE's 6 losses, <b>5 come from the hardest Dev 1–3</b>; hp778 is likewise 5/6 from Dev 1–3.</li>
+    <li>refit50 is 5/7 from Dev 1–3, with the other two from Dev 4–7.</li>
+    <li><b>Dev 8–11 and 12–15 lose nothing at all.</b></li>
+    <li><b>No single problem is lost by all three models.</b></li>
+  </ul>
+  <p>So this is not one stable, uniform skill being destroyed — it is <em>probability re-allocation on borderline problems</em> plus sampling noise.</p>
+
+  <h3><span class="hn">1.2</span>The clearest evidence: more correct samples, fewer problems covered</h3>
+  <div class="table-scroll">
+    <table>
+      <caption>Against Base floor=0 (3,200 samples per model = 200 problems × 16)</caption>
+      <thead><tr><th>Model</th><th>Correct of 3,200 samples</th><th>pass@1</th><th>Solved</th></tr></thead>
+      <tbody>
+        <tr class="base"><td><span class="dot" style="--c:var(--s1)"></span>Base floor=0</td><td class="n">1,595</td><td class="n">49.844%</td><td class="n">189</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>Standard SE E1</td><td class="n">1,568</td><td class="n">49.000%</td><td class="n">186</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s3)"></span>hp778</td><td class="n">1,601</td><td class="n">50.031%</td><td class="n">185</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s4)"></span>bucket-0 refit50</td><td class="n">1,614</td><td class="n">50.438%</td><td class="n">188</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <figure class="fig">
+    <p class="fig-title">Deltas vs Base floor=0: correct samples and coverage diverge</p>
+    <p class="fig-sub">hp778 has 6 more correct samples than Base yet covers 4 fewer problems; refit50 has 19 more yet still covers 1 fewer</p>
+    <div class="dgrid">
+      <div class="dpanel">
+        <h4>Δ correct samples (of 3,200)</h4>
+        <p class="dsub">full scale ±30</p>
+        <div class="drow"><span class="dn">Standard SE E1</span><div class="dtrack"><span class="dneg"><b style="--w:90%;--c:var(--s2)"></b></span><span class="dpos"></span></div><span class="dval neg">−27</span></div>
+        <div class="drow"><span class="dn">hp778</span><div class="dtrack"><span class="dneg"></span><span class="dpos"><b style="--w:20%;--c:var(--s3)"></b></span></div><span class="dval">+6</span></div>
+        <div class="drow"><span class="dn">refit50</span><div class="dtrack"><span class="dneg"></span><span class="dpos"><b style="--w:63.3%;--c:var(--s4)"></b></span></div><span class="dval">+19</span></div>
+      </div>
+      <div class="dpanel">
+        <h4>Δ problems covered (Solved, of 200)</h4>
+        <p class="dsub">full scale ±5</p>
+        <div class="drow"><span class="dn">Standard SE E1</span><div class="dtrack"><span class="dneg"><b style="--w:60%;--c:var(--s2)"></b></span><span class="dpos"></span></div><span class="dval neg">−3</span></div>
+        <div class="drow"><span class="dn">hp778</span><div class="dtrack"><span class="dneg"><b style="--w:80%;--c:var(--s3)"></b></span><span class="dpos"></span></div><span class="dval neg">−4</span></div>
+        <div class="drow"><span class="dn">refit50</span><div class="dtrack"><span class="dneg"><b style="--w:20%;--c:var(--s4)"></b></span><span class="dpos"></span></div><span class="dval neg">−1</span></div>
+      </div>
+    </div>
+    <figcaption>Total correct samples rise while coverage falls: probability is concentrating onto a subset of problems. A higher pass@1 does not guarantee a higher pass@16 / solved.</figcaption>
+  </figure>
+
+  <figure class="fig">
+    <p class="fig-title">How distribution sharpening works</p>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 680 268" role="img" aria-label="Schematic: after SFT some problems gain success probability while low-probability borderline problems collapse to near zero" style="min-width:560px">
+      <text x="16" y="20" font-size="11" fill="var(--ink-3)">Per-problem success probability (schematic)</text>
+      <text x="16" y="82" font-size="12" font-weight="600" fill="var(--ink)">Base</text>
+      <g fill="var(--ink-3)" opacity="0.55">
+        <rect x="90"  y="54" width="24" height="50" rx="2"></rect>
+        <rect x="132" y="64" width="24" height="40" rx="2"></rect>
+        <rect x="174" y="60" width="24" height="44" rx="2"></rect>
+        <rect x="216" y="74" width="24" height="30" rx="2"></rect>
+        <rect x="258" y="70" width="24" height="34" rx="2"></rect>
+        <rect x="300" y="82" width="24" height="22" rx="2"></rect>
+        <rect x="342" y="78" width="24" height="26" rx="2"></rect>
+        <rect x="384" y="88" width="24" height="16" rx="2"></rect>
+        <rect x="426" y="92" width="24" height="12" rx="2"></rect>
+        <rect x="468" y="95" width="24" height="9"  rx="2"></rect>
+        <rect x="510" y="97" width="24" height="7"  rx="2"></rect>
+        <rect x="552" y="99" width="24" height="5"  rx="2"></rect>
+      </g>
+      <text x="501" y="82" font-size="11" fill="var(--ink-3)" text-anchor="middle">low-probability tail</text>
+      <line x1="84" y1="104" x2="600" y2="104" stroke="var(--rule-strong)"></line>
+
+      <text x="16" y="200" font-size="12" font-weight="600" fill="var(--ink)">After SFT</text>
+      <text x="90" y="150" font-size="11" fill="var(--ink-2)">probability concentrates → pass@1 flat or ↑</text>
+      <g fill="var(--accent)">
+        <rect x="90"  y="164" width="24" height="60" rx="2"></rect>
+        <rect x="132" y="172" width="24" height="52" rx="2"></rect>
+        <rect x="174" y="169" width="24" height="55" rx="2"></rect>
+        <rect x="216" y="184" width="24" height="40" rx="2"></rect>
+        <rect x="258" y="179" width="24" height="45" rx="2"></rect>
+        <rect x="300" y="194" width="24" height="30" rx="2"></rect>
+        <rect x="342" y="190" width="24" height="34" rx="2"></rect>
+      </g>
+      <rect x="384" y="218" width="24" height="6" rx="2" fill="var(--ink-3)" opacity="0.55"></rect>
+      <g fill="none" stroke="var(--ink-3)" stroke-dasharray="3 3">
+        <rect x="426" y="212" width="24" height="12" rx="2"></rect>
+        <rect x="468" y="215" width="24" height="9"  rx="2"></rect>
+        <rect x="510" y="217" width="24" height="7"  rx="2"></rect>
+        <rect x="552" y="219" width="24" height="5"  rx="2"></rect>
+      </g>
+      <text x="600" y="182" font-size="11" fill="var(--ink-2)" text-anchor="end">rare 1-in-16 successes → 0</text>
+      <text x="600" y="198" font-size="11" fill="var(--ink-3)" text-anchor="end">so pass@16 and solved fall</text>
+      <line x1="84" y1="224" x2="600" y2="224" stroke="var(--rule-strong)"></line>
+    </svg>
+    </div>
+    <figcaption>Base holds a little success probability on many problems; after SFT, some problems become more probable (solid bars, left) while low-probability borderline problems collapse to near zero (dashed outlines, right). This is classic distribution sharpening.</figcaption>
+  </figure>
+</section>
+
+<!-- ================= II ================= -->
+<section id="s2">
+  <div class="kicker"><span class="knum">II</span>Causes</div>
+  <h2>Five structural flaws in the current SE-SFT recipe</h2>
+
+  <h3><span class="hn">2.1</span>The SFT objective is misaligned with pass@16</h3>
+  <p>Current K1 SFT imitates mostly <b>one</b> filtered correct answer per problem. The cross-entropy objective only asks to raise that trajectory's likelihood; it does not reward:</p>
+  <ul>
+    <li>preserving Base's other algorithmic modes;</li>
+    <li>covering different solutions across 16 samples;</li>
+    <li>keeping a problem's rare 1-in-16 success mode alive.</li>
+  </ul>
+  <p>Rejection sampling does pick better answers — but "higher answer quality" is not "a wider solution distribution in the student."</p>
+
+  <h3><span class="hn">2.2</span>Autonomous thinking is never directly supervised</h3>
+  <p>These native-final models use <code>loss_scope = final</code>: the native <code>assistant.thinking</code> appears in the teacher-forced context, but its tokens are masked. That is, the model learns to emit the final <b>after</b> a correct reasoning trace — it is <em>never directly trained to generate that trace on its own</em>.</p>
+  <div class="tokwrap">
+    <div class="tokrow">
+      <span class="tag">Train</span>
+      <span class="tok plain">prompt</span>
+      <span class="tok masked">correct assistant.thinking<small>teacher-forced · tokens masked, no loss</small></span>
+      <span class="tok loss">final<small>the only part with loss</small></span>
+    </div>
+    <div class="tokrow">
+      <span class="tag">Test</span>
+      <span class="tok plain">prompt</span>
+      <span class="tok">self-generated thinking<small>often shorter, differently distributed</small></span>
+      <span class="tok">final<small>emitted just as confidently</small></span>
+    </div>
+  </div>
+  <p>At test time the model must produce its own analysis, so we get: train on "correct thinking → learn the correct final," test on "shorter / different thinking → confidently emit a final." This also explains why SFT often improves code formatting without improving reasoning coverage.</p>
+
+  <h3><span class="hn">2.3</span>Same floor=7300 label, but thinking compute is not actually matched</h3>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Model</th><th>Dev mean thinking</th><th>Hit max_forces=24</th></tr></thead>
+      <tbody>
+        <tr class="base"><td><span class="dot" style="--c:var(--s1)"></span>Base floor=7300</td><td class="n">5,587</td><td class="n">68.6%</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>Standard SE E1</td><td class="n">4,806</td><td class="n">76.0%</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s3)"></span>hp778</td><td class="n">4,814</td><td class="n">75.9%</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s4)"></span>bucket-0 refit50</td><td class="n">5,002</td><td class="n">74.7%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>SFT models get force-continued more often yet still stop earlier; many samples hit max_forces=24, so the protocol cannot actually push them to 7,300 tokens. The same floor=7300 label is therefore <em>not the same actual thinking budget</em>. Standard SE / hp778 think about 14% less than Base on average — likely a further hit to the hardest Dev 1–3.</p>
+
+  <h3><span class="hn">2.4</span>The three "different SEs" share one training flaw</h3>
+  <p>They are not three independent methods:</p>
+  <ul>
+    <li>Standard SE and hp778 use <b>the same <code>se_k1_native_final</code> data and final-only loss</b>, varying only dose and hyperparameters.</li>
+    <li>The bucket-0 refit uses its 794-row bucket-0 subset — still final-only loss.</li>
+    <li>K1 gives each problem only one target trajectory.</li>
+    <li>SE evolution outputs are not format-consistent; many loop≥1 samples are shorter, code-heavy finals.</li>
+  </ul>
+  <p>So <em>hyperparameters can only soften the forgetting — they cannot fix the shared objective and data-format problems</em>.</p>
+
+  <h3><span class="hn">2.5</span>Training dose does drive forgetting</h3>
+  <figure class="fig">
+    <p class="fig-title">bucket-0-only internal ablation: Dev pass@16 declines monotonically with epochs</p>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 680 240" role="img" aria-label="Line chart: Dev pass@16 falls from 94.0% at Base to 90.5% at 15.6 epochs" style="min-width:560px">
+      <g stroke="var(--grid)">
+        <line x1="46" y1="46.7"  x2="650" y2="46.7"></line>
+        <line x1="46" y1="100"   x2="650" y2="100"></line>
+        <line x1="46" y1="153.3" x2="650" y2="153.3"></line>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--ink-3)" text-anchor="end">
+        <text x="40" y="50">94%</text>
+        <text x="40" y="104">92%</text>
+        <text x="40" y="157">90%</text>
+      </g>
+      <line x1="46" y1="180" x2="650" y2="180" stroke="var(--rule-strong)"></line>
+      <polyline points="46,46.7 121.5,60 197,60 348,113.3 635,140" fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>
+      <g fill="var(--s1)" stroke="var(--surface)" stroke-width="2">
+        <circle cx="46"    cy="46.7"  r="4.5"></circle>
+        <circle cx="121.5" cy="60"    r="4.5"></circle>
+        <circle cx="197"   cy="60"    r="4.5"></circle>
+        <circle cx="348"   cy="113.3" r="4.5"></circle>
+        <circle cx="635"   cy="140"   r="4.5"></circle>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--ink-2)" text-anchor="middle">
+        <text x="50"  y="34">94.0</text>
+        <text x="121" y="48">93.5</text>
+        <text x="197" y="48">93.5</text>
+        <text x="348" y="101">91.5</text>
+        <text x="635" y="128">90.5</text>
+      </g>
+      <g font-size="11" fill="var(--ink-2)" text-anchor="middle">
+        <text x="46"  y="200">Base</text>
+        <text x="121" y="200">2</text>
+        <text x="197" y="200">4</text>
+        <text x="348" y="200">8</text>
+        <text x="635" y="200">15.6</text>
+      </g>
+      <g font-size="10" fill="var(--ink-3)" text-anchor="middle">
+        <text x="121" y="216">≈ refit ckpt-50 dose</text>
+        <text x="625" y="216">UM390 (15.6 ep)</text>
+      </g>
+    </svg>
+    </div>
+    <figcaption>X-axis: training epochs. Longer training progressively overwrites Base's original distribution. Choosing 2 epochs and checkpoint-50 is the right direction; UM390's 15.6 epochs is clearly excessive.</figcaption>
+  </figure>
+
+  <div class="verdict">
+    <span class="vlabel">My read</span>
+    SE-SFT produces a real hard-capability gain on bucket-0, at the cost of a slight contraction of Dev long-tail coverage. The cost concentrates in the hardest Dev 1–3, and no single formal comparison reaches statistical significance. It looks like SFT's probability concentration, CoT shortening, and mild forgetting — not an across-the-board decline in coding ability.
+  </div>
+
+  <p>The real fixes are not more LR/BS search, but:</p>
+  <ul>
+    <li><b>Unify and semantically validate</b> the analysis/final format;</li>
+    <li><b>Directly supervise clean native thinking</b>, not just the final;</li>
+    <li>Mix in a share of <b>Base-compatible replay</b>;</li>
+    <li><b>Normalize per problem</b> and pick algorithm-family-diverse SE solutions, not descendants of one breakthrough;</li>
+    <li>Use a harness that <b>actually reaches the same thinking budget</b>;</li>
+    <li>For RL, add a <b>KL / retention constraint</b> toward Base — otherwise GRPO can mode-collapse further.</li>
+  </ul>
+  <div class="warnbox">Unifying the format must first pass a human semantic gate: <b>3 of the first 12 canonical v1 items are substantively contradictory</b> and cannot be used for training yet.</div>
+</section>
+
+<!-- ================= III ================= -->
+<section id="s3">
+  <div class="kicker"><span class="knum">III</span>Clarification</div>
+  <h2>The bucket-0 gain and the Dev 1–3 losses are not contradictory</h2>
+  <p>The confusion — "bucket-0 is supposedly harder, so how can it improve while Dev 1–3 loses problems?" — is reasonable, but two premises need correcting:</p>
+  <ol>
+    <li>bucket-0 is <em>not</em> "strictly harder than Dev 1–3" on one monotonic difficulty axis.</li>
+    <li>Against Base floor=0, the bucket-0 refit <em>does not regress on Dev 1–3 — it improves slightly</em>.</li>
+  </ol>
+
+  <h3><span class="hn">3.1</span>Dev 1–3 in isolation</h3>
+  <div class="table-scroll">
+    <table>
+      <caption>Dev 1–3 (50 problems)</caption>
+      <thead><tr><th>Model</th><th>pass@1</th><th>pass@8</th><th>pass@16</th><th>Solved</th></tr></thead>
+      <tbody>
+        <tr class="base"><td><span class="dot" style="--c:var(--s1)"></span>Base floor=0</td><td class="n">15.250%</td><td class="n">61.763%</td><td class="n">78.0%</td><td class="n">39/50</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>Standard SE E1 floor=7300</td><td class="n">17.125%</td><td class="n">62.474%</td><td class="n">74.0%</td><td class="n">37/50</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s3)"></span>hp778 floor=7300</td><td class="n">16.375%</td><td class="n">58.466%</td><td class="n">72.0%</td><td class="n">36/50</td></tr>
+        <tr class="hl"><td><span class="dot" style="--c:var(--s4)"></span>bucket-0 refit50 floor=7300</td><td class="n"><b>17.500%</b></td><td class="n"><b>65.380%</b></td><td class="n"><b>80.0%</b></td><td class="n"><b>40/50</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <figure class="fig">
+    <p class="fig-title">Dev 1–3: pass@1 lifts, pass@16 splits</p>
+    <div class="legend">
+      <span><i class="dot" style="--c:var(--s1)"></i>Base floor=0</span>
+      <span><i class="dot" style="--c:var(--s2)"></i>Standard SE E1</span>
+      <span><i class="dot" style="--c:var(--s3)"></i>hp778</span>
+      <span><i class="dot" style="--c:var(--s4)"></i>bucket-0 refit50</span>
+    </div>
+    <div class="fig-scroll">
+    <div class="gchart">
+      <div class="gplot">
+        <div class="gline" style="--g:100"><span>100</span></div>
+        <div class="gline" style="--g:75"><span>75</span></div>
+        <div class="gline" style="--g:50"><span>50</span></div>
+        <div class="gline" style="--g:25"><span>25</span></div>
+        <div class="ggroups">
+          <div class="ggroup">
+            <div class="gbar" style="--v:15.25;--c:var(--s1)" tabindex="0" data-tip="Base 15.250%"><span class="v">15.3</span></div>
+            <div class="gbar" style="--v:17.125;--c:var(--s2)" tabindex="0" data-tip="Standard SE E1 17.125%"><span class="v">17.1</span></div>
+            <div class="gbar" style="--v:16.375;--c:var(--s3)" tabindex="0" data-tip="hp778 16.375%"><span class="v">16.4</span></div>
+            <div class="gbar" style="--v:17.5;--c:var(--s4)" tabindex="0" data-tip="refit50 17.500%"><span class="v">17.5</span></div>
+          </div>
+          <div class="ggroup">
+            <div class="gbar" style="--v:61.763;--c:var(--s1)" tabindex="0" data-tip="Base 61.763%"></div>
+            <div class="gbar" style="--v:62.474;--c:var(--s2)" tabindex="0" data-tip="Standard SE E1 62.474%"></div>
+            <div class="gbar" style="--v:58.466;--c:var(--s3)" tabindex="0" data-tip="hp778 58.466%"></div>
+            <div class="gbar" style="--v:65.38;--c:var(--s4)" tabindex="0" data-tip="refit50 65.380%"></div>
+          </div>
+          <div class="ggroup">
+            <div class="gbar" style="--v:78;--c:var(--s1)" tabindex="0" data-tip="Base 78.0%"><span class="v">78</span></div>
+            <div class="gbar" style="--v:74;--c:var(--s2)" tabindex="0" data-tip="Standard SE E1 74.0%"><span class="v">74</span></div>
+            <div class="gbar" style="--v:72;--c:var(--s3)" tabindex="0" data-tip="hp778 72.0%"><span class="v">72</span></div>
+            <div class="gbar" style="--v:80;--c:var(--s4)" tabindex="0" data-tip="refit50 80.0%"><span class="v">80</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="gxlabs"><span>pass@1</span><span>pass@8</span><span>pass@16</span></div>
+    </div>
+    </div>
+    <figcaption>All three SFT models beat Base on pass@1; but Standard SE and hp778 fall on pass@16 / solved — the direct signature of probability concentration. refit50 beats Base on every metric. Y-axis in %.</figcaption>
+  </figure>
+
+  <ul>
+    <li>Standard SE and hp778: Dev 1–3 pass@1 rises while pass@16 / solved falls — <b>success probability concentrating</b>.</li>
+    <li>bucket-0 refit50: pass@1, pass@8, pass@16 and solved are <b>all above Base</b> on Dev 1–3.</li>
+    <li>refit50's total Dev falls 189 → 188 because Dev 4–7 drops from 50/50 to 48/50, offsetting the one problem gained on 1–3.</li>
+  </ul>
+  <p>So "bucket-0 improves, therefore Dev 1–3 must regress" does not hold for refit50.</p>
+
+  <h3><span class="hn">3.2</span>Why bucket-0 is not the same kind of "harder"</h3>
+  <p>Buckets are assigned by how many of Base's initial 16 samples solved a problem — <em>not by algorithmic complexity</em>. bucket-0 means an observed 0/16; bucket 1–3 means an observed 1–3/16. That observation carries heavy sampling noise: a problem with a true 5% per-sample success rate still fails all 16 with probability</p>
+  <div class="math">(1 − 0.05)<sup>16</sup> ≈ 44%</div>
+  <p>— so it may well land in bucket-0 on one run and in 1–3 on another. bucket-0 therefore mixes:</p>
+  <ul>
+    <li>genuinely extremely hard problems;</li>
+    <li>Base's systematic blind spots;</li>
+    <li>low-but-nonzero success-rate problems that happened to go 0-for-16;</li>
+    <li>problems where SE is especially good at searching out a class of fixes.</li>
+  </ul>
+  <p>Dev 1–3 may contain entirely different algorithm families. <em>Coding-problem difficulty is not a linearly transferable scalar</em>: mastering a batch of very hard DP solutions does not guarantee keeping the rare solution modes of mid-difficulty parsing / graph / implementation problems.</p>
+
+  <h3><span class="hn">3.3</span>Why "the training set has bucket 1–3 answers" is not enough</h3>
+  <p>The training set does hold 745 bucket 1–3 rows — but <b>not these 50 Dev problems</b>: Dev IDs are strictly held out from training; anything else would be test leakage. More importantly, the nature of the training signal differs sharply:</p>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Training slice</th><th>Total rows</th><th>Strict only-SE rows</th><th>only-SE share</th></tr></thead>
+      <tbody>
+        <tr><td>bucket-0</td><td class="n">794</td><td class="n">323</td><td class="n"><b>40.7%</b></td></tr>
+        <tr><td>bucket 1–3</td><td class="n">745</td><td class="n">25</td><td class="n">3.4%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul>
+    <li>About 40% of the bucket-0 data represents "SE found a capability signal that ordinary search did not."</li>
+    <li>Of the 745 bucket 1–3 answers, only about 25 represent genuinely new SE reach.</li>
+    <li>The rest are mostly problems Base/independent could already solve — just one more correct answer.</li>
+  </ul>
+  <p>So bucket-0-only training is strongly enriched in SE-specific signal, while bucket 1–3 data is mostly answer replay of known capability. <em>Having a correct answer does not mean it provides a new, transferable reasoning skill.</em> On top of that, the current setup is K1 + final-only loss: mostly one correct trajectory per problem; thinking carries no direct loss; the objective neither asks to preserve alternative solutions nor optimizes pass@16's algorithmic coverage. The model can therefore raise success probability on some 1–3 problems — visible as higher pass@1 — while erasing other problems' rare, roughly 1-in-16 success modes.</p>
+
+  <h3><span class="hn">3.4</span>The bucket-0 gain itself is not uniform dominance over Base</h3>
+  <div class="table-scroll">
+    <table>
+      <caption>Per-problem comparison against Base floor=0 (Bucket-0 457)</caption>
+      <thead><tr><th>Model</th><th>Newly solved bucket-0</th><th>Lost Base-solved</th><th>Net gain</th></tr></thead>
+      <tbody>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>Standard SE E1</td><td class="n">14</td><td class="n">8</td><td class="n">+6</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s3)"></span>hp778</td><td class="n">15</td><td class="n">6</td><td class="n">+9</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s4)"></span>bucket-0 refit50</td><td class="n">11</td><td class="n">6</td><td class="n">+5</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>hp778's 29 solved problems are therefore not "Base's 20 kept, plus 9 more" — they are:</p>
+  <div class="math">14 kept from Base + 15 newly solved − 6 lost from Base = 29</div>
+  <p>The "hard-capability gain" is still <em>a re-configuration of the capability distribution</em>, not a uniform upgrade on every problem. Netting out positive on bucket-0 while taking small losses on other borderline problems is entirely consistent.</p>
+</section>
+
+<!-- ================= IV ================= -->
+<section id="s4">
+  <div class="kicker"><span class="knum">IV</span>Full results</div>
+  <h2>Updated comparison tables</h2>
+
+  <div class="table-scroll">
+    <table>
+      <caption>Dev 200</caption>
+      <thead><tr><th>Model / setting</th><th>Mean thinking</th><th>pass@1</th><th>pass@8</th><th>pass@16</th><th>Solved</th></tr></thead>
+      <tbody>
+        <tr class="base"><td><span class="dot" style="--c:var(--s1)"></span>Base floor=0</td><td class="n">4,987</td><td class="n">49.844%</td><td class="n">88.541%</td><td class="n"><b>94.5%</b></td><td class="n"><b>189/200</b></td></tr>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>Standard SE E1 floor=7300</td><td class="n">4,806</td><td class="n">49.000%</td><td class="n">88.602%</td><td class="n">93.0%</td><td class="n">186/200</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s3)"></span>Best-hyperparameter SE hp778 floor=7300</td><td class="n">4,814</td><td class="n">50.031%</td><td class="n">87.501%</td><td class="n">92.5%</td><td class="n">185/200</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s4)"></span>bucket-0 refit checkpoint-50 floor=7300</td><td class="n">5,002</td><td class="n"><b>50.438%</b></td><td class="n"><b>89.025%</b></td><td class="n">94.0%</td><td class="n">188/200</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <caption>Bucket-0 457</caption>
+      <thead><tr><th>Model / setting</th><th>Mean thinking</th><th>pass@1</th><th>pass@8</th><th>pass@16</th><th>Solved</th></tr></thead>
+      <tbody>
+        <tr class="base"><td><span class="dot" style="--c:var(--s1)"></span>Base floor=0</td><td class="n">6,887</td><td class="n">0.520%</td><td class="n">2.751%</td><td class="n">4.376%</td><td class="n">20/457</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s6)"></span>BoN K1 native-final E2 floor=0</td><td class="n">5,939</td><td class="n">0.424%</td><td class="n">2.743%</td><td class="n">4.376%</td><td class="n">20/457</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s6)"></span>BoN K1 native-final E2 floor=7300</td><td class="n">6,741</td><td class="n">0.438%</td><td class="n">2.111%</td><td class="n">3.063%</td><td class="n">14/457</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>Standard SE E1 floor=7300</td><td class="n">6,210</td><td class="n">0.615%</td><td class="n">3.471%</td><td class="n">5.689%</td><td class="n">26/457</td></tr>
+        <tr class="hl"><td><span class="dot" style="--c:var(--s3)"></span>Best-hyperparameter SE hp778 floor=7300</td><td class="n">6,416</td><td class="n"><b>0.848%</b></td><td class="n"><b>4.018%</b></td><td class="n"><b>6.346%</b></td><td class="n"><b>29/457</b></td></tr>
+        <tr><td><span class="dot" style="--c:var(--s5)"></span>bucket-0 UM390 floor=7300</td><td class="n">5,200</td><td class="n">0.725%</td><td class="n">2.902%</td><td class="n">3.939%</td><td class="n">18/457</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s4)"></span>bucket-0 refit checkpoint-50 floor=7300</td><td class="n">6,442</td><td class="n">0.766%</td><td class="n">3.699%</td><td class="n">5.470%</td><td class="n">25/457</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <figure class="fig">
+    <p class="fig-title">Bucket-0 457: pass@16 compared</p>
+    <p class="fig-sub">Full scale 7%; right column shows Solved counts</p>
+    <div class="fig-scroll">
+    <div class="hchart">
+      <div class="hrow"><span class="hname"><i class="dot" style="--c:var(--s3)"></i>hp778 floor=7300</span><div class="htrack"><div class="hfill" style="--v:6.346;--c:var(--s3)"><i>6.346%</i></div></div><span class="hval">29/457</span></div>
+      <div class="hrow"><span class="hname"><i class="dot" style="--c:var(--s2)"></i>Standard SE E1 floor=7300</span><div class="htrack"><div class="hfill" style="--v:5.689;--c:var(--s2)"><i>5.689%</i></div></div><span class="hval">26/457</span></div>
+      <div class="hrow"><span class="hname"><i class="dot" style="--c:var(--s4)"></i>refit50 floor=7300</span><div class="htrack"><div class="hfill" style="--v:5.47;--c:var(--s4)"><i>5.470%</i></div></div><span class="hval">25/457</span></div>
+      <div class="hrow"><span class="hname"><i class="dot" style="--c:var(--s1)"></i>Base floor=0</span><div class="htrack"><div class="hfill" style="--v:4.376;--c:var(--s1)"><i>4.376%</i></div></div><span class="hval">20/457</span></div>
+      <div class="hrow"><span class="hname"><i class="dot" style="--c:var(--s6)"></i>BoN K1 E2 floor=0</span><div class="htrack"><div class="hfill" style="--v:4.376;--c:var(--s6)"><i>4.376%</i></div></div><span class="hval">20/457</span></div>
+      <div class="hrow"><span class="hname"><i class="dot" style="--c:var(--s5)"></i>UM390 floor=7300</span><div class="htrack"><div class="hfill" style="--v:3.939;--c:var(--s5)"><i>3.939%</i></div></div><span class="hval">18/457</span></div>
+      <div class="hrow"><span class="hname"><i class="dot" style="--c:var(--s6)"></i>BoN K1 E2 floor=7300</span><div class="htrack"><div class="hfill" style="--v:3.063;--c:var(--s6)"><i>3.063%</i></div></div><span class="hval">14/457</span></div>
+    </div>
+    </div>
+    <figcaption>The SE family (hp778, Standard SE, refit50) all clear Base; BoN brings no bucket-0 gain; over-trained UM390 lands below Base.</figcaption>
+  </figure>
+
+  <p class="tnote">With Base floor=0, actual thinking compute is also much closer: Dev is 4,987 vs 4,806–5,002; bucket-0 is 6,887 vs 6,210–6,442. UM390, at only 5,200 tokens, remains the most mismatched — and over-trained — comparison.</p>
+</section>
+
+<!-- ================= V ================= -->
+<section id="s5">
+  <div class="kicker"><span class="knum">V</span>The fix</div>
+  <h2>Family-balanced, insight-first, per-problem-normalized multi-solution distillation</h2>
+  <p>The most viable path is not stuffing all of SE's K4 into SFT. The goal is not for the model to memorize more code, but to first learn</p>
+  <div class="math">p(algorithm family | problem)</div>
+  <p>and then</p>
+  <div class="math">p(reasoning, code | problem, algorithm family)</div>
+
+  <h3><span class="hn">5.1</span>Why the existing K4 did not distill diversity</h3>
+  <ul>
+    <li>Multiple answers are often <b>descendants of the same breakthrough</b> — different ASTs, same algorithm.</li>
+    <li>A problem with 4 rows gets <b>4× gradient weight</b>, changing per-problem dose.</li>
+    <li>SE loop-0, loop≥1 and BoN analysis/final <b>formats are inconsistent</b>.</li>
+    <li>native-final trains only the final — <b>genuinely different thinking gets no direct loss</b>.</li>
+  </ul>
+  <p>So the model often sees not "four algorithms" but "four ways of writing the same algorithm."</p>
+
+  <h3><span class="hn">5.2</span>Proposed data pipeline</h3>
+  <figure class="fig">
+    <div class="fig-scroll">
+    <svg viewBox="0 0 640 592" role="img" aria-label="Data pipeline: correct SE candidates pass full tests, are clustered by algorithm family, one representative per family, normalized into the insight format, per-problem weight fixed to 1, then multi-reference SFT" style="min-width:520px">
+      <defs>
+        <marker id="arrA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-3)"></path>
+        </marker>
+      </defs>
+      <g fill="var(--surface-2)" stroke="var(--rule-strong)">
+        <rect x="70" y="8"   width="310" height="54" rx="10"></rect>
+        <rect x="70" y="92"  width="310" height="54" rx="10"></rect>
+        <rect x="70" y="176" width="310" height="54" rx="10"></rect>
+        <rect x="70" y="260" width="310" height="54" rx="10"></rect>
+        <rect x="70" y="344" width="310" height="54" rx="10"></rect>
+        <rect x="70" y="512" width="310" height="54" rx="10"></rect>
+      </g>
+      <rect x="70" y="428" width="310" height="54" rx="10" fill="var(--accent-wash)" stroke="var(--accent)"></rect>
+      <g stroke="var(--ink-3)" stroke-width="1.3" marker-end="url(#arrA)">
+        <line x1="225" y1="62"  x2="225" y2="86"></line>
+        <line x1="225" y1="146" x2="225" y2="170"></line>
+        <line x1="225" y1="230" x2="225" y2="254"></line>
+        <line x1="225" y1="314" x2="225" y2="338"></line>
+        <line x1="225" y1="398" x2="225" y2="422"></line>
+        <line x1="225" y1="482" x2="225" y2="506"></line>
+      </g>
+      <g font-size="13" fill="var(--ink)" text-anchor="middle">
+        <text x="225" y="41">All correct SE candidates</text>
+        <text x="225" y="125">Full test validation</text>
+        <text x="225" y="209">Cluster by algorithm family</text>
+        <text x="225" y="286">One best representative per family</text>
+        <text x="225" y="377">Normalize into insight → reasoning → final</text>
+        <text x="225" y="454">Per-problem total loss weight fixed to 1</text>
+        <text x="225" y="545">Multi-reference SFT</text>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--ink-2)" text-anchor="middle">
+        <text x="225" y="304">K_i = min(4, true family count)</text>
+        <text x="225" y="472">w_ij = 1 / F_i</text>
+      </g>
+      <g font-size="11" fill="var(--ink-3)">
+        <text x="396" y="190">normalized AST/CFG · data</text>
+        <text x="396" y="205">structures &amp; complexity · LLM</text>
+        <text x="396" y="220">descriptor · lineage · classifier</text>
+        <text x="396" y="282">never pad to K4 with</text>
+        <text x="396" y="298">same-breakthrough descendants</text>
+        <text x="396" y="459" fill="var(--accent-deep)" font-weight="600">★ the most important control</text>
+      </g>
+    </svg>
+    </div>
+    <figcaption>Correctness precedes diversity: only candidates that pass the full tests enter family clustering.</figcaption>
+  </figure>
+
+  <p><b>① Identify true algorithm families first.</b> Text dedup or AST2 alone is not enough. Extract from each candidate at least: the core observation, algorithm class, state definition, key invariants, data structures, time and space complexity, its substantive difference from other candidates, and its SE lineage / breakthrough loop / parent. Cluster using normalized AST/CFG, data structures and complexity, an LLM-extracted algorithm descriptor, lineage information, and a pairwise semantic-family classifier.</p>
+  <p><b>② Keep one representative per family.</b> For each problem take <code>K_i = min(4, true algorithm family count)</code>; never pad to K4 with duplicate descendants. A problem might keep, say: sorting + greedy, prefix/suffix, binary search, and dynamic programming. If a problem has only one true algorithm, keep K1. Training row counts may differ; per-problem total weight must not.</p>
+  <p><b>③ Fix the per-problem gradient weight.</b> If a problem has F<sub>i</sub> families, each family sample gets:</p>
+  <div class="math">w<sub>ij</sub> = 1 / F<sub>i</sub>&nbsp;&nbsp;&nbsp;(K1 problems: weight 1 each; K2: 1/2; K4: 1/4)</div>
+  <p>Or sample one family per problem per epoch, rotating each epoch. Either way the model learns multiple solutions without multi-solution problems getting 4× the training dose. <em>This is the single most important control missing from naive K4.</em></p>
+
+  <h3><span class="hn">5.3</span>Insight as the multi-modal entry point</h3>
+  <p>The unified analysis should not be a terse answer summary — it should <em>make different algorithms diverge from the very first tokens</em>:</p>
+  <div class="spec">
+    <div class="spec-row"><div class="spec-key">INSIGHT</div><div class="spec-val">What is the key, non-obvious observation? Why does it turn the original problem into a solvable form?</div></div>
+    <div class="spec-row"><div class="spec-key">APPROACH</div><div class="spec-val">Which algorithm and data structures? What do the states/variables mean? In what order is it computed?</div></div>
+    <div class="spec-row"><div class="spec-key">CORRECTNESS</div><div class="spec-val">What is the core invariant? Why are no solutions missed or double-counted?</div></div>
+    <div class="spec-row"><div class="spec-key">COMPLEXITY</div><div class="spec-val">Time complexity, space complexity.</div></div>
+    <div class="spec-row"><div class="spec-key">IMPLEMENTATION CHECKS</div><div class="spec-val">Boundary conditions; error-prone details.</div></div>
+    <div class="spec-row"><div class="spec-key">FINAL</div><div class="spec-val">A <b>complete Python solution</b> in one fixed, consistent format.</div></div>
+  </div>
+  <p>This way a problem's four families diverge at the earliest Insight tokens, and the model can more easily keep a multi-modal distribution. Otherwise, plain MLE over four similar long code blobs tends to average into one dominant mode.</p>
+
+  <div class="warnbox"><b>Mind the canonical-data risk:</b> the current canonical v1 cannot be used as-is — 3 of the first 12 human-gated items are substantively contradictory. The safer generation flow: ① let the teacher propose candidate insights from the problem alone; ② align insights with verified SE code families; ③ have a critic check insight / algorithm / complexity / code consistency; ④ repair; ⑤ then run code tests plus human semantic spot-checks. Never let the teacher write a long "pseudo-native CoT" while looking at the answer — regen/full already showed that answer-conditioned explanations shorten reasoning and cause capability forgetting.</div>
+
+  <h3><span class="hn">5.4</span>Adjust the training objective in three phases</h3>
+  <p><b>Phase 1 — low-risk, immediately doable.</b> Keep the current native-final + final-only setup and change only solution selection:</p>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Arm</th><th>Data</th><th>Per-problem weight</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td class="n">A</td><td style="text-align:left">current SE K1</td><td class="n">1</td><td style="text-align:left">baseline</td></tr>
+        <tr><td class="n">B</td><td style="text-align:left">naive SE K4</td><td class="n">4</td><td style="text-align:left">known-broken control</td></tr>
+        <tr class="hl"><td class="n">C</td><td style="text-align:left">family-balanced SE K≤4</td><td class="n">1</td><td style="text-align:left">isolates genuine diversity selection</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="tnote">If C clearly beats A/B, past K4 failures were mostly duplicate descendants plus dose inflation — no need to introduce format changes first.</p>
+
+  <p><b>Phase 2 — distill reasoning diversity.</b> After the semantic gate passes, add:</p>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Arm</th><th>Data</th><th>Loss</th></tr></thead>
+      <tbody>
+        <tr><td class="n">C</td><td style="text-align:left">family-balanced native</td><td style="text-align:left">final-only</td></tr>
+        <tr><td class="n">D</td><td style="text-align:left">family-balanced canonical insight</td><td style="text-align:left">analysis + final</td></tr>
+        <tr><td class="n">E</td><td style="text-align:left">D + Base/BoN replay</td><td style="text-align:left">analysis + final</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="tnote">This separates "family selection" from "reasoning supervision" diagnostically.</p>
+
+  <p><b>Phase 3 — two-stage generation.</b> At inference, do not generate full code immediately:</p>
+  <figure class="fig">
+    <div class="fig-scroll">
+    <svg viewBox="0 0 760 312" role="img" aria-label="Two-stage generation: from one problem, sample 4 insights, deduplicate semantically into 3 families, generate code per family, then select by tests or a verifier" style="min-width:620px">
+      <defs>
+        <marker id="arrB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-3)"></path>
+        </marker>
+      </defs>
+      <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--ink-3)" text-anchor="middle">
+        <text x="62" y="16">problem</text>
+        <text x="236" y="16">sample 4 insights</text>
+        <text x="407" y="16">semantic dedup</text>
+        <text x="579" y="16">family → code</text>
+        <text x="706" y="16">select</text>
+      </g>
+      <g stroke="var(--ink-3)" stroke-width="1.3" marker-end="url(#arrB)" fill="none">
+        <line x1="108" y1="160" x2="164" y2="54"></line>
+        <line x1="108" y1="160" x2="164" y2="128"></line>
+        <line x1="108" y1="160" x2="164" y2="202"></line>
+        <line x1="108" y1="160" x2="164" y2="276"></line>
+        <line x1="302" y1="54"  x2="340" y2="78"></line>
+        <line x1="302" y1="128" x2="340" y2="94"></line>
+        <line x1="302" y1="202" x2="340" y2="164"></line>
+        <line x1="302" y1="276" x2="340" y2="236"></line>
+        <line x1="468" y1="86"  x2="514" y2="86"></line>
+        <line x1="468" y1="160" x2="514" y2="160"></line>
+        <line x1="468" y1="234" x2="514" y2="234"></line>
+        <line x1="638" y1="86"  x2="660" y2="146"></line>
+        <line x1="638" y1="160" x2="660" y2="160"></line>
+        <line x1="638" y1="234" x2="660" y2="174"></line>
+      </g>
+      <g fill="var(--surface-2)" stroke="var(--rule-strong)">
+        <rect x="16"  y="136" width="92"  height="48" rx="9"></rect>
+        <rect x="170" y="34"  width="132" height="40" rx="9"></rect>
+        <rect x="170" y="108" width="132" height="40" rx="9"></rect>
+        <rect x="170" y="182" width="132" height="40" rx="9"></rect>
+        <rect x="170" y="256" width="132" height="40" rx="9"></rect>
+        <rect x="346" y="66"  width="122" height="40" rx="9"></rect>
+        <rect x="346" y="140" width="122" height="40" rx="9"></rect>
+        <rect x="346" y="214" width="122" height="40" rx="9"></rect>
+        <rect x="520" y="66"  width="118" height="40" rx="9"></rect>
+        <rect x="520" y="140" width="118" height="40" rx="9"></rect>
+        <rect x="520" y="214" width="118" height="40" rx="9"></rect>
+      </g>
+      <rect x="662" y="124" width="82" height="72" rx="9" fill="var(--accent-wash)" stroke="var(--accent)"></rect>
+      <g font-size="12" fill="var(--ink)" text-anchor="middle">
+        <text x="62" y="164">problem</text>
+        <text x="236" y="58">① DP</text>
+        <text x="236" y="132">② DP (equiv.)</text>
+        <text x="236" y="206">③ greedy</text>
+        <text x="236" y="280">④ binary search</text>
+        <text x="407" y="90">DP</text>
+        <text x="407" y="164">greedy</text>
+        <text x="407" y="238">binary search</text>
+      </g>
+      <g font-size="11" fill="var(--ink-2)" text-anchor="middle">
+        <text x="579" y="90">reasoning + code</text>
+        <text x="579" y="164">reasoning + code</text>
+        <text x="579" y="238">reasoning + code</text>
+      </g>
+      <g font-size="11" fill="var(--ink)" text-anchor="middle">
+        <text x="703" y="152">tests /</text>
+        <text x="703" y="167">verifier</text>
+        <text x="703" y="182">select</text>
+      </g>
+    </svg>
+    </div>
+    <figcaption>Sample 4 insights/approaches first, deduplicate semantically (① and ② collapse into the DP family), generate code per insight, then pick by tests or a verifier. This yields algorithm-level diversity far more readily than sampling 16 full answers from the same prompt.</figcaption>
+  </figure>
+
+  <h3><span class="hn">5.5</span>Data mixture</h3>
+  <p>Do not use SE alone for every bucket:</p>
+  <div class="mix">
+    <div><b>BUCKET-0</b>SE first — especially strict only-SE rows and genuinely distinct breakthrough families.</div>
+    <div><b>BUCKET 1–3</b>Merge SE with BoN/independent, then select by family.</div>
+    <div><b>BUCKET 4–15</b>Prefer Base-compatible BoN/loop-0 replay: here the independent solutions actually carry more true algorithm families.</div>
+    <div><b>THROUGHOUT</b>Keep 20–30% Base-compatible replay to guard against Dev coverage contraction.</div>
+  </div>
+  <p>In short: <b>bucket-0 = SE discovery; 1–3 = SE + BoN family union; 4–15 = BoN/loop-0 retention replay</b>.</p>
+
+  <h3><span class="hn">5.6</span>If GRPO comes later</h3>
+  <p>GRPO must not reward correctness alone, or it too collapses onto a single high-reward mode. At minimum:</p>
+  <div class="math">R = R<sub>correct</sub> + λ·R<sub>family novelty</sub> − β·KL(π ‖ π<sub>base</sub>) − γ·R<sub>duplicate</sub></div>
+  <p>Generate 8–16 candidates per group: passing the full tests earns the correctness reward; belonging to a new family among the group's correct answers earns the novelty reward; same-family duplicates earn nothing extra; the KL term preserves Base's Dev distribution; length and format are constrained.</p>
+  <p>But I would run <em>family-balanced SFT first</em>: it is cheaper, and it directly answers whether SE's diversity has any training value at all. If even that shows no gain, jumping straight to GRPO would likely just be a more expensive mode collapse.</p>
+
+  <div class="verdict">
+    <span class="vlabel">The decisive experiment</span>
+    Not "K1 vs K4," but <b>K1 vs naive K4 vs genuine family-balanced K≤4</b> — at equal per-problem weight, equal token/update dose, and identical format. Only that truly answers whether SE's rich solution set can be distilled.
+  </div>
+</section>
+
+<footer>
+  Data and conclusions from internal evaluations, August 2026: Dev 200 and Bucket-0 457, 16 samples per problem per model (3,200 samples on Dev). Per-problem comparisons use the same-protocol Base floor=7300; aggregate comparisons use Base floor=0. No per-problem difference reaches statistical significance (McNemar p ≥ 0.125).
+</footer>
+
+</div>
