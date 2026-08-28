@@ -1,0 +1,657 @@
+<title>超越采样边界</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700;900&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --surface: #fcfdfe;
+    --surface-2: #eef1f5;
+    --ink: #171a20;
+    --ink-2: #555b66;
+    --ink-3: #878d99;
+    --rule: #e2e5eb;
+    --rule-strong: #c6ccd6;
+    --accent: #2a78d6;
+    --accent-deep: #1c5cab;
+    --accent-wash: rgba(42, 120, 214, 0.08);
+    --todo: #b25e00;
+    --todo-wash: rgba(237, 161, 0, 0.12);
+    --s1: #2a78d6;
+    --s2: #eb6834;
+    --s6: #008300;
+    --grid: #e4e7ec;
+    --shadow: 0 1px 2px rgba(23, 26, 32, 0.05), 0 6px 20px rgba(23, 26, 32, 0.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #101319;
+      --surface: #1a1e26;
+      --surface-2: #212630;
+      --ink: #e9ebf0;
+      --ink-2: #a7aeba;
+      --ink-3: #7b8290;
+      --rule: #2a303b;
+      --rule-strong: #3c4350;
+      --accent: #3987e5;
+      --accent-deep: #74abec;
+      --accent-wash: rgba(57, 135, 229, 0.13);
+      --todo: #e0a33e;
+      --todo-wash: rgba(201, 133, 0, 0.16);
+      --s1: #3987e5;
+      --s2: #d95926;
+      --s6: #2e9e2e;
+      --grid: #272d38;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #101319;
+    --surface: #1a1e26;
+    --surface-2: #212630;
+    --ink: #e9ebf0;
+    --ink-2: #a7aeba;
+    --ink-3: #7b8290;
+    --rule: #2a303b;
+    --rule-strong: #3c4350;
+    --accent: #3987e5;
+    --accent-deep: #74abec;
+    --accent-wash: rgba(57, 135, 229, 0.13);
+    --todo: #e0a33e;
+    --todo-wash: rgba(201, 133, 0, 0.16);
+    --s1: #3987e5;
+    --s2: #d95926;
+    --s6: #2e9e2e;
+    --grid: #272d38;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    font-size: 15.5px;
+    line-height: 1.9;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition: none !important; }
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px 96px; }
+  p, ul, ol { max-width: 720px; }
+  ul, ol { padding-left: 1.4em; }
+  li { margin: 5px 0; }
+  a { color: var(--accent-deep); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+  em { font-style: normal; font-weight: 700; color: var(--accent-deep); }
+  code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.86em;
+    background: var(--surface-2);
+    padding: 1px 6px;
+    border-radius: 5px;
+  }
+  section { scroll-margin-top: 24px; margin-top: 64px; }
+
+  /* ---------- masthead ---------- */
+  header.masthead { padding-top: 60px; text-align: center; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    color: var(--accent-deep);
+    text-transform: uppercase;
+  }
+  h1 {
+    font-family: "Noto Serif SC", "Songti SC", Georgia, serif;
+    font-weight: 900;
+    font-size: clamp(26px, 4.6vw, 38px);
+    line-height: 1.45;
+    margin: 14px auto 6px;
+    max-width: 760px;
+    text-wrap: balance;
+  }
+  .en-title {
+    font-family: "Noto Serif SC", Georgia, serif;
+    font-size: 15px;
+    color: var(--ink-3);
+    font-style: italic;
+    margin: 0 0 22px;
+  }
+  .authors { font-size: 14.5px; color: var(--ink-2); margin: 0 0 4px; }
+  .authors b { color: var(--ink); font-weight: 700; }
+  .draftnote { font-size: 12.5px; color: var(--ink-3); font-family: "IBM Plex Mono", monospace; }
+
+  .abstract {
+    text-align: left;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 24px 30px;
+    margin: 32px auto 0;
+    max-width: 760px;
+    font-size: 14.5px;
+    line-height: 2;
+  }
+  .abstract .ab-label {
+    display: block;
+    font-family: "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  nav.toc {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 20px;
+    padding: 16px 0;
+    margin-top: 28px;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    font-size: 13px;
+  }
+  nav.toc a { color: var(--ink-2); }
+  nav.toc a b { font-family: "IBM Plex Mono", monospace; color: var(--accent-deep); margin-right: 4px; }
+
+  /* ---------- sections ---------- */
+  h2 {
+    font-family: "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: 23px;
+    line-height: 1.5;
+    margin: 0 0 14px;
+  }
+  h2 .sn, h3 .sn {
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 600;
+    color: var(--accent-deep);
+    margin-right: 10px;
+    font-size: 0.85em;
+  }
+  h3 {
+    font-family: "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: 17.5px;
+    margin: 34px 0 8px;
+  }
+  .para-lead { font-weight: 700; }
+
+  .todo {
+    display: inline;
+    background: var(--todo-wash);
+    color: var(--todo);
+    border-radius: 6px;
+    padding: 1px 8px;
+    font-size: 0.88em;
+    font-weight: 700;
+  }
+
+  /* ---------- tables ---------- */
+  .table-scroll {
+    overflow-x: auto;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin: 18px 0 6px;
+  }
+  table { border-collapse: collapse; width: 100%; min-width: 600px; font-size: 13.5px; }
+  caption {
+    text-align: left;
+    font-size: 12.5px;
+    color: var(--ink-2);
+    padding: 12px 16px 0;
+    line-height: 1.7;
+  }
+  caption b { color: var(--ink); }
+  th {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    color: var(--ink-3);
+    text-align: right;
+    padding: 12px 14px 8px;
+    border-bottom: 1px solid var(--rule-strong);
+    white-space: nowrap;
+  }
+  th:first-child, td:first-child { text-align: left; }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  td.n { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  tr.hl td { background: var(--accent-wash); }
+  tr.base td { color: var(--ink-2); }
+  tr.base td:first-child { color: var(--ink); }
+  td b { font-weight: 700; color: var(--ink); }
+  .tnote { font-size: 12.5px; color: var(--ink-3); margin: 8px 2px 0; max-width: 760px; }
+
+  /* ---------- figures ---------- */
+  figure.fig {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 20px 22px 16px;
+    box-shadow: var(--shadow);
+    margin: 22px 0;
+  }
+  .fig-title { font-size: 14px; font-weight: 700; margin: 0 0 10px; }
+  figcaption { font-size: 12.5px; color: var(--ink-3); margin-top: 12px; line-height: 1.75; max-width: 760px; }
+  figcaption b { color: var(--ink-2); }
+  .fig svg { max-width: 100%; height: auto; display: block; }
+  .fig-scroll { overflow-x: auto; }
+
+  /* range chart */
+  .rchart { min-width: 520px; }
+  .rrow { display: grid; grid-template-columns: 120px 1fr 120px; align-items: center; gap: 12px; margin: 10px 0; }
+  .rname { font-size: 12.5px; color: var(--ink-2); display: flex; align-items: center; white-space: nowrap; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--c); margin-right: 8px; flex: none; }
+  .rtrack { position: relative; height: 18px; }
+  .rtrack::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid var(--grid); }
+  .rbar { position: absolute; top: 2px; bottom: 2px; left: var(--l); width: var(--w); background: var(--c); border-radius: 7px; }
+  .rpt { position: absolute; top: 50%; left: var(--l); width: 13px; height: 13px; border-radius: 50%; background: var(--c); transform: translate(-50%, -50%); border: 2px solid var(--surface); }
+  .rval { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--ink-2); }
+  .raxis { display: flex; justify-content: space-between; margin: 4px 0 0; padding: 0 120px 0 132px; font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--ink-3); }
+
+  /* ---------- callouts ---------- */
+  .warnbox, .note {
+    border-left: 3px solid var(--todo);
+    background: var(--todo-wash);
+    padding: 14px 20px;
+    border-radius: 0 10px 10px 0;
+    margin: 20px 0;
+    max-width: 720px;
+    font-size: 14px;
+  }
+  .note { border-left-color: var(--accent); background: var(--accent-wash); }
+  .verdict {
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--accent);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    border-radius: 0 12px 12px 0;
+    padding: 22px 28px;
+    margin: 26px 0;
+    max-width: 760px;
+    font-family: "Noto Serif SC", serif;
+    font-size: 16px;
+    line-height: 2.05;
+  }
+  .verdict .vlabel {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--accent-deep);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .math {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
+    padding: 12px 18px;
+    border-radius: 10px;
+    overflow-x: auto;
+    max-width: 720px;
+    margin: 14px 0;
+    white-space: nowrap;
+  }
+  .math sub { font-size: 10px; }
+
+  .prompt-block {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    line-height: 1.75;
+    background: var(--surface-2);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 18px 22px;
+    max-width: 760px;
+    white-space: pre-wrap;
+    overflow-x: auto;
+    color: var(--ink-2);
+  }
+
+  .refs { font-size: 12.5px; color: var(--ink-2); max-width: 760px; }
+  .refs li { margin: 6px 0; line-height: 1.65; }
+  .refs i { color: var(--ink-3); }
+
+  footer {
+    margin-top: 90px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    font-size: 12.5px;
+    color: var(--ink-3);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 720px) {
+    .rrow { grid-template-columns: 96px 1fr 90px; }
+    .verdict { padding: 18px 20px; font-size: 15px; }
+  }
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <div class="eyebrow">NeurIPS 2026 Workshop · 论文草稿 v1 · 中文对照版</div>
+  <h1>超越采样边界：将测试时演化发现<br>蒸馏为可泛化的编码能力</h1>
+  <p class="en-title">Beyond the Sampling Frontier: Distilling Test-Time Evolutionary Discoveries into Generalizable Coding Capability</p>
+  <p class="authors"><b>Mian Wu</b> · <span class="todo">TODO：合作者（Harman 等）与单位</span></p>
+  <p class="draftnote">主文 5 页 + 参考文献 + 附录 · LaTeX 源文件位于 paper/neurips-workshop/</p>
+
+  <div class="abstract">
+    <span class="ab-label">摘要</span>
+    测试时搜索——从重复采样到基于执行反馈的演化式改进——能让语言模型解决远超单次采样能力的编程问题。但搜索只改进眼前这一个实例，其成本在每道新题上重复发生。我们研究测试时的发现能否转化为<b>持久能力</b>：在测试时演化所发现的解上做微调，能否泛化到未见过的问题？在获取条件匹配（相同题目来源池、生成预算、SFT 配方与 held-out 评测）的前提下，在 Squeeze-Evolve（SE，一种 oracle 验证的演化式搜索）发现的解上做 SFT，把一个 held-out 困难前沿集从 20 题提升到 26–29 题（共 457 题，3 个 seed），而在 Best-of-N 数据上做 SFT 停留在 20–21 题。我们把差距归因于 <b>support expansion</b>：Best-of-N 可用数据中只有 3.4% 超出普通采样可达范围，而 SE 为 40.7%——朴素 self-training 喂给模型的是它已经会的东西，这是一种被演化式搜索打破的 capability-selection bias。蒸馏并非免费：我们在通用 dev 集上记录了轻微且不显著的分布锐化代价（189 → 185–188 / 200），并证明低剂量 refit 能在保住大部分前沿收益的同时恢复大部分覆盖。<b>Search gains</b> 与 <b>learnable gains</b> 是两条不同的轴；我们提出 family-balanced 蒸馏，把更多前者转化为后者。
+  </div>
+
+  <nav class="toc">
+    <a href="#s1"><b>1</b>引言</a>
+    <a href="#s2"><b>2</b>从发现到能力</a>
+    <a href="#s3"><b>3</b>实验设置</a>
+    <a href="#s4"><b>4</b>结果</a>
+    <a href="#s5"><b>5</b>讨论</a>
+    <a href="#s6"><b>6</b>路线图</a>
+    <a href="#s7"><b>7</b>结论</a>
+    <a href="#appendix"><b>A/B</b>附录</a>
+    <a href="#todos"><b>✓</b>待办汇总</a>
+  </nav>
+</header>
+
+<!-- ============ 1 ============ -->
+<section id="s1">
+  <h2><span class="sn">1</span>引言</h2>
+  <p>扩展测试时计算能可靠地拓展语言模型的解题范围。仅靠重复采样就能提升推理与编码基准上的覆盖率 [Chen et al. 2021; Brown et al. 2024; Snell et al. 2024]；更丰富的流程——self-refinement [Madaan et al. 2023; Shinn et al. 2023]、基于执行反馈的修复 [Olausson et al. 2024]、对程序做演化式搜索 [Romera-Paredes et al. 2024; Novikov et al. 2025]——走得更远：在可靠 verifier 的加持下，搜索能到达 base policy 几乎永远采不出的解。然而「oracle 验证的搜索能找到更多解」已基本是公认结论——而且它本身并不令人满意：收益要在每个实例上重新支付一次，且不在模型权重中留下任何痕迹。</p>
+  <p>自然的下一步是把搜索产出蒸馏回模型 [Zelikman et al. 2022; Yuan et al. 2023; Gulcehre et al. 2023; Singh et al. 2024]。但朴素 self-training 带有一个隐蔽的失败模式：<em>policy 在为自己挑选训练数据</em>。在普通采样下，一道题贡献验证解的概率就是模型自己在这道题上的成功率；处于能力前沿、p<sub>θ</sub>(success) ≈ 0 的题几乎永远进不了训练集。于是 self-training 喂给模型的主要是它已经会做的示范——一种 <em>capability-selection bias</em>，让概率质量在已知模式上继续集中而非向外扩展（参见偏好调优下的多样性损失 [Kirk et al. 2024]）。</p>
+  <p>本文提出我们认为对测试时搜索最重要的问题：<b>测试时演化发现的解——尤其是普通采样根本采不到的 0→1 发现——能否被蒸馏成可以迁移到未见问题的能力？</b>我们刻意区分两条常被混为一谈的轴：<em>search gain</em>（推理时解出更多实例）与 <em>learnable gain</em>（所发现轨迹的下游训练价值）。一个方法完全可能只有前者而没有后者。</p>
+
+  <p class="para-lead">贡献。</p>
+  <ol>
+    <li><b>获取条件匹配的对照。</b>在题目来源池、生成预算、验证、SFT 配方与评测全部固定的前提下，SE 数据上的 SFT 把 held-out 前沿集从 20 题提升到 26–29 / 457（3 seeds），Best-of-N SFT 停在 20–21——两个 seed 分布不重叠（§4.1）。</li>
+    <li><b>来源分析。</b>收益可追溯到超出普通采样可达范围的数据：SE 前沿切片中 40.7% 的行是任何普通采样管线都没找到的解，较易切片中只有 3.4%；逐题分解显示改善来自新解出的题，而非均匀提升（§4.2）。</li>
+    <li><b>诚实的代价核算。</b>蒸馏会轻微<em>锐化</em>输出分布：在 200 题通用 dev 集上，正确 sample 数可以上升而覆盖题数下降（189 → 185–188；不显著、集中于最难切片）。该效应随剂量增长，而低剂量 refit 能在保住大部分前沿收益的同时恢复覆盖（§4.3）。</li>
+    <li><b>蒸馏路线图。</b>我们分析当前配方为何锐化（单参考目标、thinking 无监督、思考预算不匹配），并提出 family-balanced、insight-first、per-problem-normalized 的多解蒸馏（§6）。</li>
+  </ol>
+
+  <figure class="fig">
+    <p class="fig-title">图 1 · 获取条件匹配的实验设计</p>
+    <div class="fig-scroll">
+    <svg viewBox="0 0 750 250" role="img" aria-label="流程图：同一训练题池分别经 Best-of-N 采样与 Squeeze-Evolve 演化产生数据集，再经过完全相同的 SFT，在 held-out 的 Frontier-457 上对比" style="min-width:620px">
+      <defs>
+        <marker id="arrP" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-3)"></path>
+        </marker>
+      </defs>
+      <g stroke="var(--ink-3)" stroke-width="1.3" marker-end="url(#arrP)" fill="none">
+        <line x1="128" y1="112" x2="172" y2="62"></line>
+        <line x1="128" y1="138" x2="172" y2="188"></line>
+        <line x1="432" y1="62"  x2="478" y2="112"></line>
+        <line x1="432" y1="188" x2="478" y2="138"></line>
+        <line x1="600" y1="125" x2="626" y2="125"></line>
+      </g>
+      <g fill="var(--surface-2)" stroke="var(--rule-strong)">
+        <rect x="16"  y="95"  width="112" height="60" rx="10"></rect>
+        <rect x="178" y="28"  width="254" height="68" rx="10"></rect>
+        <rect x="178" y="154" width="254" height="68" rx="10"></rect>
+        <rect x="484" y="95"  width="116" height="60" rx="10"></rect>
+      </g>
+      <rect x="630" y="80" width="104" height="90" rx="10" fill="var(--accent-wash)" stroke="var(--accent)"></rect>
+      <g font-size="12.5" fill="var(--ink)" text-anchor="middle">
+        <text x="72" y="121">训练题池</text>
+        <text x="305" y="49">Best-of-N 采样</text>
+        <text x="305" y="175">Squeeze-Evolve（SE）</text>
+        <text x="542" y="119">完全相同的 SFT</text>
+        <text x="682" y="102">Frontier-457</text>
+      </g>
+      <g font-size="10.5" fill="var(--ink-3)" text-anchor="middle">
+        <text x="72" y="139">评测 ID 严格隔离</text>
+        <text x="305" y="66">从 p_θ 采 n 个 · 保留通过验证的</text>
+        <text x="305" y="83">D_BoN：3.4% 超出采样可达</text>
+        <text x="305" y="192">针对 oracle 测试演化候选</text>
+        <text x="305" y="209">D_SE：40.7% 超出采样可达</text>
+        <text x="542" y="137">配方 · 预算 · 3 seeds</text>
+        <text x="682" y="118">held out</text>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle">
+        <text x="682" y="140" fill="var(--ink-2)">BoN 20–21</text>
+        <text x="682" y="158" fill="var(--accent-deep)" font-weight="600">SE 26–29</text>
+      </g>
+    </svg>
+    </div>
+    <figcaption><b>除了「验证解如何被发现」，一切都相同。</b>两个数据集不同——这个不同正是被研究的处理变量而非混淆：SE 把前沿问题带入普通采样无法供给的训练 support。</figcaption>
+  </figure>
+</section>
+
+<!-- ============ 2 ============ -->
+<section id="s2">
+  <h2><span class="sn">2</span>从发现到能力</h2>
+  <p><b>设定。</b>令 p<sub>θ</sub> 为在编程问题 x 上生成解 y 的 base policy，每道题配有可执行单元测试（oracle）。通过完整测试套件的解称为<em>已验证</em>。我们按 base 模型在最初 16 次采样中的解出次数分层：<em>bucket-b</em> 包含解出 b/16 次的题。bucket-0 是可观测的前沿；注意该观测带噪——真实单次成功率 5% 的题仍有 (1−0.05)<sup>16</sup> ≈ 44% 的概率落入 bucket-0——因此 bucket-0 混合了真正的难题、系统性盲点与运气不佳的低概率题。</p>
+  <p><b>两种获取流程，同一预算。</b><em>Best-of-N（BoN）</em>对每题从 p<sub>θ</sub> 采 n 个候选，保留通过验证的并每题选一条。<em>Squeeze-Evolve（SE）</em>运行迭代演化循环：候选程序种群在 oracle 测试上执行，失败候选依据执行反馈进行变异、重组与修复；收集通过验证的幸存者。<span class="todo">TODO：填写 SE 循环超参——种群规模、循环轮数、变异算子、每题预算</span>。对于所有直接采样均失败的题，其解称为 <em>0→1 发现</em>。两种流程看到同一题池与可比生成预算。</p>
+  <p>我们强调「匹配」的含义：匹配的是<em>获取条件</em>——题池、预算、验证、格式、SFT 配方、评测——而不是所得数据集。D<sub>SE</sub> ≠ D<sub>BoN</sub> 正是被研究的处理变量（图 1）；强行让两个数据集一致会直接删掉待研究的现象，因为 SE 的作用（如果有）恰恰是改变训练数据的 <em>support</em>。</p>
+  <p><b>蒸馏。</b>除特别说明外，所有 SFT arm 使用相同的 K1（每题单参考）native 格式配方：teacher-forced 的原生推理轨迹出现在上下文中但被 loss mask，loss 只作用于 final 解；2 epochs。这些选择与 §4.3 的失效分析直接相关。</p>
+</section>
+
+<!-- ============ 3 ============ -->
+<section id="s3">
+  <h2><span class="sn">3</span>实验设置</h2>
+  <p><b>模型与数据。</b>学生模型为 <span class="todo">TODO：模型名</span> 4B 代码模型。训练池含 <span class="todo">TODO：题池规模</span> 道带单元测试的题；所有评测 ID 与训练严格互斥（否则即为泄漏）。SE 的 SFT 集含前沿（bucket-0）切片 794 行、bucket 1–3 切片 745 行；BoN 集在同一题池、同一预算下构建。<span class="todo">TODO：数据统计匹配表——D_SE 与 D_BoN 的行数、unique 题数、总 token、解长度分布</span></p>
+  <p><b>评测。</b>(a) <em>Frontier-457</em>：457 道 held-out 题，base 模型在初筛中 0/16 解出。(b) <em>Dev-200</em>：200 道 held-out 通用题，覆盖四个难度切片（1–3 最难到 12–15 最易），用于衡量保持性。每模型每题采 16 个 sample；报告 pass@1 / pass@8 / pass@16 与 <em>solved</em>（≥1 个验证 sample 的题数）。SFT arm 各训 3 个 seed。</p>
+  <p><b>思考预算。</b>SFT 模型在 7,300 token 的强制推理下限（floor）下评测。由于 SFT 缩短自发推理，与其计算量最接近的 base 对照是 floor = 0：Frontier-457 上 mean thinking 为 6,887（base）对 6,210–6,442（SE 各 arm）。</p>
+</section>
+
+<!-- ============ 4 ============ -->
+<section id="s4">
+  <h2><span class="sn">4</span>结果</h2>
+
+  <h3><span class="sn">4.1</span>主结果：演化发现的数据有训练价值；BoN 数据没有</h3>
+
+  <div class="table-scroll">
+    <table>
+      <caption><b>表 1 · Frontier-457（held out）。</b>SE 数据上的 SFT 推动前沿；同题池、同预算、同配方的 BoN 数据不能。Solved 区间为 3 seeds；各 pass@k 来自一个代表性 seed。<span class="todo">TODO：替换为 seed 均值 ± std；补配对 bootstrap / McNemar 置信区间</span></caption>
+      <thead><tr><th>模型</th><th>Mean thinking</th><th>pass@1</th><th>pass@8</th><th>pass@16</th><th>Solved / 457</th></tr></thead>
+      <tbody>
+        <tr class="base"><td><span class="dot" style="--c:var(--s1)"></span>Base（floor 0）</td><td class="n">6,887</td><td class="n">0.520%</td><td class="n">2.751%</td><td class="n">4.376%</td><td class="n">20</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s6)"></span>BoN-SFT（floor 0）</td><td class="n">5,939</td><td class="n">0.424%</td><td class="n">2.743%</td><td class="n">4.376%</td><td class="n">20 [20–21]</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>SE-SFT · 标准</td><td class="n">6,210</td><td class="n">0.615%</td><td class="n">3.471%</td><td class="n">5.689%</td><td class="n">26 [<b>26–29</b>]</td></tr>
+        <tr class="hl"><td><span class="dot" style="--c:var(--s2)"></span>SE-SFT · 调优（hp778）</td><td class="n">6,416</td><td class="n"><b>0.848%</b></td><td class="n"><b>4.018%</b></td><td class="n"><b>6.346%</b></td><td class="n"><b>29</b></td></tr>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>SE-SFT · 低剂量 refit</td><td class="n">6,442</td><td class="n">0.766%</td><td class="n">3.699%</td><td class="n">5.470%</td><td class="n">25</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="tnote">对照：BoN-SFT 在 floor 7,300 下降至 14/457；训练过量的 SE arm（15.6 epochs，UM390）降至 18/457（§4.3）。</p>
+
+  <figure class="fig">
+    <p class="fig-title">3 个 seed 的 Solved 分布不重叠</p>
+    <div class="fig-scroll">
+    <div class="rchart">
+      <div class="rrow">
+        <span class="rname"><i class="dot" style="--c:var(--s1)"></i>Base</span>
+        <div class="rtrack"><span class="rpt" style="--l:16.7%;--c:var(--s1)"></span></div>
+        <span class="rval">20 / 457</span>
+      </div>
+      <div class="rrow">
+        <span class="rname"><i class="dot" style="--c:var(--s6)"></i>BoN-SFT</span>
+        <div class="rtrack"><span class="rbar" style="--l:16.7%;--w:8.3%;--c:var(--s6)"></span></div>
+        <span class="rval">20–21 / 457</span>
+      </div>
+      <div class="rrow">
+        <span class="rname"><i class="dot" style="--c:var(--s2)"></i>SE-SFT</span>
+        <div class="rtrack"><span class="rbar" style="--l:66.7%;--w:25%;--c:var(--s2)"></span></div>
+        <span class="rval"><b>26–29</b> / 457</span>
+      </div>
+      <div class="raxis"><span>18</span><span>21</span><span>24</span><span>27</span><span>30</span></div>
+    </div>
+    </div>
+    <figcaption>min(SE) = 26 &gt; max(BoN) = 21：相对 base 的 20 题为 +30%–45%。</figcaption>
+  </figure>
+
+  <p>表 1 给出核心发现。三个 seed 上，SE-SFT 在 457 道 held-out 前沿题中解出 26–29 道，base 为 20——相对提升 +30%–45%——且 pass@1、pass@8、pass@16 一致抬升。同题池、同配方、同预算训练的 BoN-SFT 停在 20–21。</p>
+  <p>第一，这个改善不能解释为「在验证过的代码上做 SFT 自然有帮助」：BoN-SFT 就是直接的反例——收集更多<em>普通可达</em>的正确解并不能推动前沿。第二，由于 Frontier-457 与训练互斥，SE 的收益是泛化而非记忆：在<em>其他</em>问题上由演化发现的解，教会了可以迁移的东西。</p>
+
+  <h3><span class="sn">4.2</span>收益从哪里来：support expansion</h3>
+
+  <div class="table-scroll">
+    <table>
+      <caption><b>表 2 · 训练信号的来源。</b>SFT 行中「任何普通采样管线都没找到该解」（only-SE）的占比。</caption>
+      <thead><tr><th>切片</th><th>行数</th><th>only-SE 行数</th><th>占比</th></tr></thead>
+      <tbody>
+        <tr><td>bucket-0</td><td class="n">794</td><td class="n">323</td><td class="n"><b>40.7%</b></td></tr>
+        <tr><td>bucket 1–3</td><td class="n">745</td><td class="n">25</td><td class="n">3.4%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <caption><b>表 3 · Frontier-457 上相对 base 的逐题分解。</b></caption>
+      <thead><tr><th>Arm</th><th>新解出</th><th>丢失</th><th>净变化</th></tr></thead>
+      <tbody>
+        <tr><td>SE · 标准</td><td class="n">14</td><td class="n">8</td><td class="n">+6</td></tr>
+        <tr><td>SE · 调优</td><td class="n">15</td><td class="n">6</td><td class="n">+9</td></tr>
+        <tr><td>SE · refit</td><td class="n">11</td><td class="n">6</td><td class="n">+5</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>为什么 D<sub>SE</sub> 能教而 D<sub>BoN</sub> 不能？表 2 量化了两条管线<em>能供给什么</em>的差别。在前沿切片中，SE 有 40.7% 的行是普通采样在该预算下从未找到的解——超出 base policy 可达范围的真实能力信号。在 bucket 1–3 中只有 3.4%；其余多是模型本来就会的题的又一条正确答案。而 BoN 数据从构造上看，处处属于后者。</p>
+  <p>这支持一个简单的解释。普通 self-training <em>透过</em> p<sub>θ</sub> 采集训练数据，其 support 被限制在 {x : p<sub>θ</sub>(success|x) ≫ 0} 内；梯度随后把概率质量继续集中到本已典型的模式上。演化利用外部执行反馈把成功概率<em>在前沿处</em>拉起来，从而扩展训练 support（D<sub>reachable</sub> → D<sub>reachable</sub> ∪ D<sub>frontier</sub>）；SFT 再把 p<sub>θ'</sub> 的质量移入 p<sub>θ</sub> 几乎不曾到达的解区域——这些模式可迁移到未见的前沿问题。</p>
+  <p>表 3 补充一个重要细节：SE 的收益是<em>重新配置</em>而非全面支配。最佳 arm 的 29 题分解为「保留 base 的 14 题 + 新解出 15 题 − 丢失 6 题」。收益压倒性地来自新解出的题，与 support expansion 的解释一致——而同一机制也预言了接下来要讲的保持性代价。</p>
+
+  <h3><span class="sn">4.3</span>蒸馏的代价：分布锐化</h3>
+
+  <div class="table-scroll">
+    <table>
+      <caption><b>表 4 · Dev-200 保持性。</b>SFT 可以在<em>提高</em>正确 sample 数的同时<em>降低</em>覆盖：分布锐化的签名。相对 base 的逐题退化均不显著（McNemar p ≥ 0.125），且集中于最难切片。</caption>
+      <thead><tr><th>模型</th><th>正确 / 3,200</th><th>pass@1</th><th>pass@16</th><th>Solved / 200</th><th>丢题来自切片 1–3</th></tr></thead>
+      <tbody>
+        <tr class="base"><td><span class="dot" style="--c:var(--s1)"></span>Base（floor 0）</td><td class="n">1,595</td><td class="n">49.844%</td><td class="n"><b>94.5%</b></td><td class="n"><b>189</b></td><td class="n">—</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>SE-SFT · 标准</td><td class="n">1,568</td><td class="n">49.000%</td><td class="n">93.0%</td><td class="n">186</td><td class="n">5 / 6</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>SE-SFT · 调优</td><td class="n">1,601</td><td class="n">50.031%</td><td class="n">92.5%</td><td class="n">185</td><td class="n">5 / 6</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>SE-SFT · 低剂量 refit</td><td class="n"><b>1,614</b></td><td class="n"><b>50.438%</b></td><td class="n">94.0%</td><td class="n">188</td><td class="n">5 / 7</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>蒸馏并非免费，而我们认为把代价报告准确本身就有价值。在 Dev-200 上（表 4），SE-SFT 各 arm 从 189 滑落到 185–188。三点观察把这次退化定性为<em>锐化</em>而非能力损失：</p>
+  <p><b>(1) 正确质量上升、覆盖下降。</b>调优 arm 比 base 多产生 6 个正确 sample（1,601 对 1,595 / 3,200）却少覆盖 4 道题；refit 多 19 个却少 1 道。成功概率向一部分题集中，而边界题上原本 1/16 级的稀有成功模式塌缩到 0/16——于是 pass@1 持平或上升而 pass@16 与 solved 下降。</p>
+  <p><b>(2) 损失局部且无系统性。</b>丢掉的题几乎全部来自最难切片（各 arm 为 5/6、5/6、5/7）；最易的两个切片一题不丢；没有任何一道题被三个 arm 共同丢失；逐题比较均未达显著（McNemar p = 0.289 / 0.125 / 0.774）。</p>
+  <p><b>(3) 效应随剂量与配方变化。</b>前沿切片数据上的 epoch 消融显示 Dev pass@16 随训练剂量单调下降：94.0%（base）→ 93.5（2 ep.）→ 93.5（4）→ 91.5（8）→ 90.5（15.6 ep.）；15.6-epoch 的 arm（UM390）在<em>前沿本身也低于 base</em>（18/457）。反过来，低剂量 refit（checkpoint-50 ≈ 2 epochs）保住前沿 25/457，同时把 Dev-200 恢复到 188/200，并在最难 Dev 切片的<em>每一项</em>指标上超过 base（pass@16 80.0% 对 78.0%；solved 40/50 对 39/50）。</p>
+  <p>配方层面的原因也可以点名：(i) K1 交叉熵目标只奖励一条参考轨迹，没有任何机制保留其他解法模式或 pass@16 覆盖；(ii) thinking 被 loss mask，模型被训练在正确推理<em>之后</em>产出 final，却从未被训练自己产出这段推理——事实上即使有强制下限，SFT 模型的思考仍比 base 少约 14%；(iii) 相同的「floor」标签并不等于相同的实际思考计算量。这些都是可修复的（§6），因此我们把锐化解读为当前配方的属性，而非「蒸馏发现」本身的属性。</p>
+</section>
+
+<!-- ============ 5 ============ -->
+<section id="s5">
+  <h2><span class="sn">5</span>讨论：search gains 与 learnable gains</h2>
+  <p>我们的结果主张把测试时计算研究中常被合并的两个问题分开。<em>搜索能否解出更多实例？</em>能——在 oracle 验证下已基本公认 [Romera-Paredes et al. 2024; Olausson et al. 2024]。<em>找到的轨迹是否携带可学习的信号？</em>并不自动成立：BoN 改进推理时选择 [Brown et al. 2024; Cobbe et al. 2021]，其数据在这里却没有推动任何东西。训练价值似乎跟随的是发现<em>超出 policy 可达范围的程度</em>，而不是收集了多少条正确轨迹。</p>
+  <p>这一框架让 verifier-free 演化成为一个锋利的开放问题，而非前置条件。当选择压力来自模型自身的判断 [Wang et al. 2023] 而非外部测试时，search gain 可能仍在，但被发现的数据所携带的、能在蒸馏后幸存的信号可能更弱——这与「缺乏外部反馈的自我纠错很弱」的证据一致 [Huang et al. 2024]。两种结果都有信息量：下游收益相当，说明自引导演化已足够；收益更弱，则把 <em>grounded verification</em> 分离为让发现可学习的关键成分。<span class="todo">TODO：verifier-free SE-SFT arm；20B 复现</span></p>
+  <p><b>替代解释。</b>D<sub>SE</sub> 与 D<sub>BoN</sub> 在长度、多样性或难度构成上的差异都可能有贡献；决定性的检验——数据统计审计，以及在 D<sub>SE</sub> \ D<sub>BoN</sub> 与匹配的普通可达子集上分别做 SFT——正在进行。<span class="todo">TODO：两项都要跑；若收益集中在 only-SE 行，support-expansion 解释即被确认</span></p>
+</section>
+
+<!-- ============ 6 ============ -->
+<section id="s6">
+  <h2><span class="sn">6</span>路线图：蒸馏更多、锐化更少</h2>
+  <p>当前管线丢弃了演化找到的大部分东西：每题往往存在多条验证解，但朴素的 K4 式多参考 SFT 在我们的早期尝试中失败，因为 (i)「不同」参考经常是同一次 breakthrough 的 descendants（同一算法、不同 AST）；(ii) 4 条参考的题静默获得 4 倍梯度权重；(iii) 各演化阶段的格式不一致；(iv) 只有 final 携带 loss。因此我们提出 <b>family-balanced、insight-first、per-problem-normalized 蒸馏</b>：把验证候选聚类为真正的<em>算法 family</em>（规范化 AST/CFG、复杂度、lineage、语义 descriptor）；每个 family 只留一个代表，K<sub>i</sub> = min(4, F<sub>i</sub>)；每行权重 w<sub>ij</sub> = 1/F<sub>i</sub>，使每题贡献单位梯度质量；并把参考统一为 insight-first 格式（<em>insight</em> → approach → correctness → complexity → final），让不同 family 从最早的 token 开始分叉——多模态目标因此可学，而不是被平均成单一模式。监督干净的原生推理、混入 20–30% base-compatible replay、匹配实际思考预算，分别对准 §4.3 点名的锐化成因。强化学习继承同一逻辑：只奖励 correctness 会重新制造锐化，因此 GRPO 式目标 [Shao et al. 2024] 需要 family-novelty 奖励与对 base 的 KL 锚。</p>
+  <p>两个数据方向扩展管线本身：<em>合成前沿问题</em>——由更强模型基于 hard-bucket 范例生成（严格不进入评测；prompt 见附录 A）——解决任务稀缺；<em>on-the-fly 判别性测试</em>——让 LLM 生成能最大程度区分候选解与参考解的输入——在测试套件薄弱处加密 oracle 信号。</p>
+</section>
+
+<!-- ============ 7 ============ -->
+<section id="s7">
+  <h2><span class="sn">7</span>结论</h2>
+  <div class="verdict">
+    <span class="vlabel">结论</span>
+    在获取、训练与评测全部匹配的条件下，oracle 验证的测试时演化所发现的解携带普通采样不具备的可迁移训练信号：在 20 题的 base 之上，held-out 前沿 +6 到 +9 题，而 Best-of-N 为 0–1 题。同一机制——超出采样可达范围的 support expansion——也预言了观察到的代价：通用分布尾部轻微、可缓解的锐化。<b>搜索负责发现；只有细致的蒸馏才能教会。</b>
+  </div>
+</section>
+
+<!-- ============ 附录 ============ -->
+<section id="appendix">
+  <h2><span class="sn">附录 A</span>合成前沿问题的生成 prompt</h2>
+  <p>以下模板从 hard-bucket 范例生成新难题。生成题只进入训练 / discovery 池；评测集保持为未触碰的真实题，以杜绝 contamination。（prompt 本体保留英文，可直接供 API 批量生成使用。）</p>
+  <div class="prompt-block">You are designing competitive-programming problems. Below are {K} example problems that a strong code model failed to solve in 16 attempts each. Study what makes them hard: the required insight, the algorithm family, the constraint regime, and the ways naive approaches fail.
+
+{hard-bucket exemplars, statement + constraints only}
+
+Generate {N} NEW problems, one per response block, satisfying all of:
+
+1. Difficulty at or above the examples: solving must require a non-obvious insight, not implementation effort alone.
+
+2. Novelty: no paraphrase or re-skin of any example or well-known problem; vary the algorithm family across the batch (at most 2 problems per family).
+
+3. Self-contained statement: input/output format, constraints, and 2 worked examples.
+
+4. A hidden reference solution in Python, correct under the stated constraints.
+
+5. A test generator producing at least 15 cases: the worked examples, boundary cases (min/max constraints, degenerate structures), and adversarial cases that break the most tempting incorrect approach (state that approach explicitly).
+
+6. A one-line difficulty rationale: which step do you predict models fail at?
+
+Output format per problem: [STATEMENT] [REFERENCE_SOLUTION] [TEST_GENERATOR] [FAILURE_RATIONALE].</div>
+
+  <h2 style="margin-top:56px"><span class="sn">附录 B</span>保持性补充数据</h2>
+  <div class="table-scroll">
+    <table>
+      <caption><b>表 5 · 最难 Dev 切片（1–3，共 50 题）。</b>所有 SFT arm 都抬升 pass@1；只有低剂量 refit 同时抬升 pass@16 与 solved——标准与调优 arm 呈现锐化签名（pass@1 升、pass@16 降）。</caption>
+      <thead><tr><th>模型</th><th>pass@1</th><th>pass@8</th><th>pass@16</th><th>Solved / 50</th></tr></thead>
+      <tbody>
+        <tr class="base"><td><span class="dot" style="--c:var(--s1)"></span>Base（floor 0）</td><td class="n">15.250%</td><td class="n">61.763%</td><td class="n">78.0%</td><td class="n">39</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>SE-SFT · 标准</td><td class="n">17.125%</td><td class="n">62.474%</td><td class="n">74.0%</td><td class="n">37</td></tr>
+        <tr><td><span class="dot" style="--c:var(--s2)"></span>SE-SFT · 调优</td><td class="n">16.375%</td><td class="n">58.466%</td><td class="n">72.0%</td><td class="n">36</td></tr>
+        <tr class="hl"><td><span class="dot" style="--c:var(--s2)"></span>SE-SFT · 低剂量 refit</td><td class="n"><b>17.500%</b></td><td class="n"><b>65.380%</b></td><td class="n"><b>80.0%</b></td><td class="n"><b>40</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="tnote">共享 floor = 7,300 标签下的实际思考计算量（Dev-200）：base 平均 5,587 thinking token、68.6% 的 sample 撞到 max-forces 上限；SFT arm 为 4,806–5,002 与 74.7–76.0%——协议无法把 SFT 模型推到名义预算，相同 floor 不等于相同计算量。</p>
+
+  <h2 style="margin-top:56px"><span class="sn">Refs</span>参考文献（节选）</h2>
+  <ol class="refs">
+    <li>Brown et al. <i>Large Language Monkeys: Scaling Inference Compute with Repeated Sampling.</i> arXiv 2024.</li>
+    <li>Chen et al. <i>Evaluating Large Language Models Trained on Code.</i> arXiv 2021.</li>
+    <li>Cobbe et al. <i>Training Verifiers to Solve Math Word Problems.</i> arXiv 2021.</li>
+    <li>Gulcehre et al. <i>Reinforced Self-Training (ReST) for Language Modeling.</i> arXiv 2023.</li>
+    <li>Huang et al. <i>Large Language Models Cannot Self-Correct Reasoning Yet.</i> ICLR 2024.</li>
+    <li>Kirk et al. <i>Understanding the Effects of RLHF on LLM Generalisation and Diversity.</i> ICLR 2024.</li>
+    <li>Madaan et al. <i>Self-Refine: Iterative Refinement with Self-Feedback.</i> NeurIPS 2023.</li>
+    <li>Novikov et al. <i>AlphaEvolve: A Coding Agent for Scientific and Algorithmic Discovery.</i> arXiv 2025.</li>
+    <li>Olausson et al. <i>Is Self-Repair a Silver Bullet for Code Generation?</i> ICLR 2024.</li>
+    <li>Romera-Paredes et al. <i>Mathematical Discoveries from Program Search with Large Language Models.</i> Nature 2024.</li>
+    <li>Shao et al. <i>DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models.</i> arXiv 2024.</li>
+    <li>Shinn et al. <i>Reflexion: Language Agents with Verbal Reinforcement Learning.</i> NeurIPS 2023.</li>
+    <li>Singh et al. <i>Beyond Human Data: Scaling Self-Training for Problem-Solving with Language Models.</i> TMLR 2024.</li>
+    <li>Snell et al. <i>Scaling LLM Test-Time Compute Optimally Can Be More Effective than Scaling Model Parameters.</i> arXiv 2024.</li>
+    <li>Wang et al. <i>Self-Consistency Improves Chain of Thought Reasoning in Language Models.</i> ICLR 2023.</li>
+    <li>Yuan et al. <i>Scaling Relationship on Learning Mathematical Reasoning with Large Language Models.</i> arXiv 2023.</li>
+    <li>Zelikman et al. <i>STaR: Bootstrapping Reasoning with Reasoning.</i> NeurIPS 2022.</li>
+  </ol>
+</section>
+
+<!-- ============ TODO 汇总 ============ -->
+<section id="todos">
+  <h2><span class="sn">✓</span>投稿前待办汇总</h2>
+  <div class="warnbox">
+    <b>草稿中所有橙色 TODO 的汇总（与 PDF 一一对应）：</b>
+    <ol style="margin:8px 0 0; max-width:100%">
+      <li>作者列表与单位（Harman 等）。</li>
+      <li>学生模型名称与训练题池规模。</li>
+      <li>SE 循环超参：种群规模、循环轮数、变异算子、每题预算。</li>
+      <li>表 1 换成 3-seed 均值 ± std；逐题配对 bootstrap / McNemar 置信区间。</li>
+      <li>数据统计匹配表：D_SE 与 D_BoN 的行数、unique 题数、总 token、解长度分布。</li>
+      <li>only-SE 消融：在 D_SE \ D_BoN 与匹配的普通可达子集上分别 SFT。</li>
+      <li>verifier-free SE-SFT arm 与 20B 复现（结果无论正负都写入 §5）。</li>
+      <li>投稿时换用目标 workshop 的官方 style 文件并匿名化（去掉 preprint 选项）。</li>
+    </ol>
+  </div>
+</section>
+
+<footer>
+  本页为 NeurIPS workshop 论文草稿 v1 的中文对照版；正式稿以英文 LaTeX 为准（paper/neurips-workshop/main.tex）。数据来自 2026-08 内部评测：Frontier-457 与 Dev-200，每模型每题 16 次采样；SFT arm 各 3 seeds；逐题对照使用同协议 floor 设置。
+</footer>
+
+</div>
